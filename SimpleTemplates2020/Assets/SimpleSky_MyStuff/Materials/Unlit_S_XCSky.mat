@@ -1,0 +1,62 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 6
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Unlit_S_XCSky
+  m_Shader: {fileID: 4800000, guid: d481561e7861f1a4894507b215f099d7, type: 3}
+  m_ShaderKeywords: 
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _MainTex:
+        m_Texture: {fileID: 2800000, guid: 4e8719be0b3569b419803b7b174928b5, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MoonTex:
+        m_Texture: {fileID: 2800000, guid: 3ef4c1a3d59d74843ad2c2a045047a46, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Floats:
+    - _CloudDayIntensity: 1.61
+    - _CloudDensity: 1
+    - _CloudNightIntensity: 1
+    - _CloudPower: 5.37
+    - _CloudScale: 1
+    - _CloudStrength: 1.96
+    - _CloudStrength2: 1
+    - _MoonDiskRadius: 0.7
+    - _MoonRadius: 7.7
+    - _MoonRimInnerControl1: 2.83
+    - _MoonRimOuterControl1: 0.7
+    - _MoonRimOuterControl2: 0.988
+    - _MoonRimOuterPower: 89.69
+    - _MoonStrength: 0.59
+    - _SunAlpha: 0.39
+    - _SunDisRadius: 1
+    - _SunDiskRadius: 0.83
+    - _SunDiskSolidPercent: -0.06
+    - _SunDiskStrength: 0.48
+    - _SunRadius: 10.6
+    - _SunStrength: 0.94
+    - _TimeNormalized: 0.391
+    m_Colors:
+    - _CloudBaseColor: {r: 1, g: 1, b: 1, a: 1}
+    - _MoonBaseColor: {r: 0.094562106, g: 0.61574876, b: 0.8018868, a: 1}
+    - _MoonDiskTintColor: {r: 0.015208514, g: 1, b: 1, a: 1}
+    - _MoonRimColor: {r: 0.60784316, g: 0.8862746, b: 0.9725491, a: 1}
+    - _MoonRimInnerColor: {r: 0.015686275, g: 0.9058824, b: 0.8588236, a: 1}
+    - _MoonRimOuterColor: {r: 0.015686275, g: 0.9058824, b: 0.8588236, a: 1}
+    - _SunBaseColor: {r: 0.9725491, g: 0.9568628, b: 0.9176471, a: 1}
+    - _SunRimColor: {r: 1, g: 0.5277778, b: 0, a: 1}
+  m_BuildTextureStacks: []
