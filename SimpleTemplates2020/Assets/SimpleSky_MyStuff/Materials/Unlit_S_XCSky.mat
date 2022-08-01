@@ -19,6 +19,10 @@ Material:
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
+    - _CloudNormTex:
+        m_Texture: {fileID: 2800000, guid: 70fb1d1e0bb76394fb6e0e024dc3bb70, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _MainTex:
         m_Texture: {fileID: 2800000, guid: 4e8719be0b3569b419803b7b174928b5, type: 3}
         m_Scale: {x: 1, y: 1}
@@ -31,6 +35,8 @@ Material:
     - _CloudDayIntensity: 1.61
     - _CloudDensity: 1
     - _CloudNightIntensity: 1
+    - _CloudNormIntensity: 1
+    - _CloudPBRIntensity: 1
     - _CloudPower: 5.37
     - _CloudScale: 1
     - _CloudStrength: 1.96
@@ -49,9 +55,10 @@ Material:
     - _SunDiskStrength: 0.48
     - _SunRadius: 10.6
     - _SunStrength: 0.94
-    - _TimeNormalized: 0.391
+    - _TimeNormalized: 0.468
     m_Colors:
     - _CloudBaseColor: {r: 1, g: 1, b: 1, a: 1}
+    - _CloudNormTiling: {r: 2, g: 2, b: 1, a: 1}
     - _MoonBaseColor: {r: 0.094562106, g: 0.61574876, b: 0.8018868, a: 1}
     - _MoonDiskTintColor: {r: 0.015208514, g: 1, b: 1, a: 1}
     - _MoonRimColor: {r: 0.60784316, g: 0.8862746, b: 0.9725491, a: 1}

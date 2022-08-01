@@ -19,6 +19,7 @@ Shader "Unlit/S_XCSky"
 		_MoonStrength("MoonStrength",Float) = 1
 		_MoonRadius("MoonRadius",Float) = 1
 		_MoonDiskRadius("MoonDiskRadius",Float) = 1
+		[NoScaleOffset]
 		_MoonTex("Texture", 2D) = "white" {}
 		_MoonRimInnerColor("MoonRimInnerColor",Color) = (1,0,0,1)
 		_MoonRimOuterColor("MoonRimOuterColor",Color) = (1,0,0,1)
@@ -34,6 +35,11 @@ Shader "Unlit/S_XCSky"
 		_CloudBaseColor("CloudBaseColor", Color) = (1,1,1,1)
 		_CloudNightIntensity("CloudNightIntensity",Float) = 1
 		_CloudDayIntensity("CloudDayIntensity",Float) = 1
+		[NoScaleOffset]
+		_CloudNormTex("_CloudNormTex", 2D) = "white" {}
+		_CloudNormTiling("CloudNormTiling", Vector) = (1,1,1,1)
+		_CloudNormIntensity("CloudNormIntensity",Range(0,2)) = 1
+		_CloudPBRIntensity("CloudPBRIntensity",Range(0,1)) = 1
     }
     SubShader
     {
@@ -140,6 +146,11 @@ Shader "Unlit/S_XCSky"
 			float4 _CloudBaseColor;
 			float _CloudNightIntensity;
 			float _CloudDayIntensity;
+			sampler2D _CloudNormTex;
+			//float4 _CloudNormTex_ST;
+			float4 _CloudNormTiling;
+			float _CloudNormIntensity;
+			float _CloudPBRIntensity;
 
 			float remap(float x, float oldmin, float oldmax, float newmin, float newmax)
 			{
@@ -397,6 +408,23 @@ Shader "Unlit/S_XCSky"
 				return col;
 			}
 
+			float3 blend_unity4(float4 n1, float4 n2)
+			{
+				n1 = n1.xyzz*float4(2, 2, 2, -2) + float4(-1, -1, -1, 1);
+				n2 = n2 * 2 - 1;
+				float3 r;
+				r.x = dot(n1.zxx, n2.xyz);
+				r.y = dot(n1.yzy, n2.xyz);
+				r.z = dot(n1.xyw, -n2.xyz);
+				return normalize(r);
+			}
+
+			//https://blog.selfshadow.com/publications/blending-in-detail/
+			float3 blend_unity3(float3 n1, float3 n2)
+			{
+				return blend_unity4(float4(n1, 1), float4(n2, 1));
+			}
+
 			//@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 			float4 frag (v2f i) : SV_Target
             {
@@ -520,8 +548,15 @@ Shader "Unlit/S_XCSky"
 				//___
 
 				float3 cloudBaseColor = _CloudBaseColor;
-				//??? need to K
-				float3 cloudColor = cloudBaseColor * pow(intensityFromTime,2) ;
+				//??? need to hand-K color
+				float3 cloudColor = cloudBaseColor * pow(intensityFromTime,2);
+				float2 uv_cloudN = _CloudNormTiling.xy * p;
+				//???
+				float2 xzDirFromSunOrbit = normalize(float2(1, 1));
+				uv_cloudN += cloudtime * xzDirFromSunOrbit;
+				float3 cloudNorm = tex2D(_CloudNormTex, uv_cloudN);
+				cloudNorm = blend_unity3(pos, cloudNorm);
+				cloudNorm = lerp(pos, cloudNorm, _CloudNormIntensity);
 
 				float cloudIntensity = abs((f+1)*0.5);
 				cloudIntensity *= _CloudStrength;
@@ -534,7 +569,7 @@ Shader "Unlit/S_XCSky"
 					float frontSubsurfaceDistortion = 0.1;
 					float backSubsurfaceDistortion = 0.9;
 					float frontSssIntensity = 1;
-					float sss = SubsurfaceScattering(normalize(i.direction), sunPos, normalize(float3(0,1,0)), frontSubsurfaceDistortion, backSubsurfaceDistortion, frontSssIntensity);
+					float sss = SubsurfaceScattering(normalize(i.direction), sunPos, cloudNorm, frontSubsurfaceDistortion, backSubsurfaceDistortion, frontSssIntensity);
 					cloudIntensity *= lerp(1, sss, intensityFromTime);
 				}
 				cloudIntensity = smoothstep(0, 1, cloudIntensity);
@@ -542,6 +577,11 @@ Shader "Unlit/S_XCSky"
 				cloudIntensity *= lerp(0.1*_CloudNightIntensity, 0.1*_CloudDayIntensity, pow(intensityFromTime, 2))*(_CloudStrength2 + 10 * pow(1 - intensityFromTime,1));
 				cloudIntensity = saturate(cloudIntensity);
 				col.rgb = lerp(col.rgb, cloudColor, cloudIntensity);
+
+				float3 oriCloudColor = cloudColor;
+				cloudColor *= saturate(dot(cloudNorm, sunPos));
+				cloudColor = lerp(oriCloudColor, cloudColor, _CloudPBRIntensity);
+
 				//cloudIntensity *= lerp(0.1, 0.7, pow(intensityFromTime, 2))*(_CloudStrength2 + 10 * (1 - intensityFromTime));
 				col.rgb += cloudIntensity * cloudColor;
 				
