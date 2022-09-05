@@ -13,7 +13,8 @@ struct v2f
     float3 worldNormal: TEXCOORD1;
     float3 worldPos: TEXCOORD2;
 	float3 worldTangent: TEXCOORD3;
-	LIGHTING_COORDS(4, 5)
+	half4 uv2: TEXCOORD4;
+	//LIGHTING_COORDS(4, 5)
 };
 
 fixed4 _Color;
@@ -27,6 +28,8 @@ half4 _FurTex_ST;
 
 //???
 sampler2D _DirTex;
+half4 _DirTex_ST;
+float _DirStrength;
 float _AnisoRoughness;
 float4 _AnisoSpecular;
 float _AnisoIntensity;
@@ -68,6 +71,7 @@ v2f vert_base(appdata_tan v)
 	//{
 	//	dir_tan = normalize(float3(-1, 1, 0));
 	//}
+	dir_tan = normalize(float3(0, 1, 0));
 	float3 bitangent = cross(v.normal, v.tangent);
 	float3 dir_obj = dir_tan.x * v.tangent + dir_tan.y*v.normal + dir_tan.z * bitangent;
 	float4 forceGlobal = mul(unity_ObjectToWorld, float4(dir_obj,1));
@@ -77,6 +81,7 @@ v2f vert_base(appdata_tan v)
     o.pos = UnityObjectToClipPos(float4(P, 1.0));
     o.uv.xy = TRANSFORM_TEX(v.texcoord, _MainTex);
     o.uv.zw = TRANSFORM_TEX(v.texcoord, _FurTex);
+	o.uv2.xy = TRANSFORM_TEX(v.texcoord, _DirTex);
     o.worldNormal = UnityObjectToWorldNormal(v.normal);
     o.worldPos = mul(unity_ObjectToWorld, v.vertex).xyz;
 	o.worldTangent = mul(unity_ObjectToWorld, v.tangent).xyz;
@@ -199,7 +204,13 @@ half3 SpecularTerm_BRDF2_Anisotropic_Cloth(half3 lightColor, half3 specColor, ha
 
 fixed4 frag_base(v2f i): SV_Target
 {
-	fixed3 noise = tex2D(_FurTex, i.uv.zw * _FurThinness).rgb;
+	//###
+	float2 uv_fur = i.uv.zw * _FurThinness;
+	float3 dir_tan = tex2D(_DirTex, i.uv2.xy).rgb;
+	dir_tan = normalize(2 * dir_tan - 1);
+	uv_fur += _DirStrength * FURSTEP * float2(dir_tan.x, dir_tan.y);
+	fixed noise = tex2D(_FurTex, uv_fur).r;
+	//___
 	fixed alpha = clamp(noise - (FURSTEP * FURSTEP) * _FurDensity, 0, 1);
 
 	//clip(alpha-0.5);
@@ -229,17 +240,19 @@ fixed4 frag_base(v2f i): SV_Target
     fixed3 diffuse = _LightColor0.rgb * albedo * saturate(dot(worldNormal, worldLight));
     fixed3 specular = _LightColor0.rgb * _Specular.rgb * pow(saturate(dot(worldNormal, worldHalf)), _Shininess);
 
-	//--- Aniso
-	float3 tangentFromImg = tex2D(_DirTex, i.uv.xy).rgb;
-	float3 tangentWorld = tangentFromImg.x * i.worldTangent
-		+ tangentFromImg.y * i.worldNormal
-		+ tangentFromImg.z * normalize(cross(i.worldNormal, i.worldTangent));
+	//### Aniso
+	float3 dirWorld = dir_tan.x * i.worldTangent
+		+ dir_tan.y * i.worldNormal
+		+ dir_tan.z * normalize(cross(i.worldNormal, i.worldTangent));
+	float3 tangentWorld = normalize(i.worldTangent + _DirStrength * FURSTEP * dirWorld);
+
 	float nl = dot(i.worldNormal, worldLight);
 	float anisoRoughness = _AnisoRoughness;
 	half3 anisoSpecTerm = SpecularTerm_BRDF2_Anisotropic_Cloth(_LightColor0.rgb, _AnisoSpecular.rgb, nl, i.worldNormal, worldLight, worldView, anisoRoughness, tangentWorld);
 	anisoSpecTerm = abs(anisoSpecTerm);
 	//___
 
+	//donnot use the origin dumy specular--xc
     fixed3 color = ambient + diffuse + specular*0+ anisoSpecTerm* _AnisoIntensity;
     
     return fixed4(color, alpha);
@@ -276,25 +289,27 @@ fixed4 frag_base_add(v2f i) : SV_Target
 	fixed3 diffuse = lightColor * albedo *  saturate(dot(worldNormal, worldLight));
 	fixed3 specular = lightColor * _Specular.rgb * pow(saturate(dot(worldNormal, worldHalf)), _Shininess);
 
-	//--- Aniso
-	float3 tangentFromImg = tex2D(_DirTex, i.uv.xy).rgb;
-	float3 tangentWorld = tangentFromImg.x * i.worldTangent
-		+ tangentFromImg.y * i.worldNormal
-		+ tangentFromImg.z * normalize(cross(i.worldNormal, i.worldTangent));
+	//### Aniso
+	float3 dir_tan = tex2D(_DirTex, i.uv2.xy).rgb;
+	dir_tan = normalize(2 * dir_tan - 1);
+	float3 dirWorld = dir_tan.x * i.worldTangent
+		+ dir_tan.y * i.worldNormal
+		+ dir_tan.z * normalize(cross(i.worldNormal, i.worldTangent));
+	float3 tangentWorld = normalize(i.worldTangent + _DirStrength * FURSTEP * dirWorld);
+
 	float nl = dot(i.worldNormal, worldLight);
 	float anisoRoughness = _AnisoRoughness;
 	half3 anisoSpecTerm = SpecularTerm_BRDF2_Anisotropic_Cloth(lightColor, _AnisoSpecular.rgb, nl, i.worldNormal, worldLight, worldView, anisoRoughness, tangentWorld);
+	anisoSpecTerm = abs(anisoSpecTerm);
 	//___
 
-	fixed3 color = ambient + diffuse + specular*0 + anisoSpecTerm * _AnisoIntensity;
-	fixed3 noise = tex2D(_FurTex, i.uv.zw * _FurThinness).rgb;
+	//donnot use the origin dumy specular--xc
+	fixed3 color = 0*ambient + diffuse + specular*0 + anisoSpecTerm * _AnisoIntensity;
+	//###
+	float2 uv_fur = i.uv.zw * _FurThinness;
+	uv_fur += _DirStrength * FURSTEP * float2(dir_tan.x, dir_tan.y);
+	fixed noise = tex2D(_FurTex, uv_fur).r;
+	//___
 	fixed alpha = clamp(noise - (FURSTEP * FURSTEP) * _FurDensity, 0, 1);
-	//if (alpha < 0.001)
-	//{
-	//	return fixed4(color*alpha, alpha);
-	//}
-	//else
-	{
-		return fixed4(color, alpha);
-	}
+	return fixed4(color, alpha);
 }

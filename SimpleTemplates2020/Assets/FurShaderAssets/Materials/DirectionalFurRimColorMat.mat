@@ -36,8 +36,8 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _DirTex:
-        m_Texture: {fileID: 2800000, guid: a5dab193f95d30042b6af52f08521c46, type: 3}
-        m_Scale: {x: 1, y: 1}
+        m_Texture: {fileID: 2800000, guid: 289946c605bf32044ac0664c5c131788, type: 3}
+        m_Scale: {x: 2, y: 2}
         m_Offset: {x: 0, y: 0}
     - _EmissionMap:
         m_Texture: {fileID: 0}
@@ -48,7 +48,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MainTex:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 2800000, guid: f4d8912a9f2fc7540bcc3cff9227a1a2, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MetallicGlossMap:
@@ -68,14 +68,15 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Floats:
-    - _AnisoIntensity: 0
-    - _AnisoRoughness: 0.055
+    - _AnisoIntensity: 1
+    - _AnisoRoughness: 0.313
     - _Blur: 0
     - _BumpScale: 1
     - _CutOff: 0
     - _Cutoff: 0.5
     - _DetailNormalMapScale: 1
     - _Diffuse: 1
+    - _DirStrength: 0.267
     - _DstBlend: 0
     - _EdgeFade: 0.66
     - _FurDensity: 0.253
@@ -92,7 +93,7 @@ Material:
     - _Parallax: 0.02
     - _Reflection: 0
     - _RimPower: 3.98
-    - _Shininess: 80
+    - _Shininess: 26
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1
@@ -101,10 +102,11 @@ Material:
     - _ZWrite: 1
     m_Colors:
     - _AnisoSpecular: {r: 1, g: 0.89299846, b: 0, a: 1}
-    - _Color: {r: 1, g: 1, b: 1, a: 0}
+    - _Color: {r: 0.9811321, g: 0.9811321, b: 0.9811321, a: 0}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _ForceGlobal: {r: -1.06, g: -0, b: 0, a: 0}
     - _ForceLocal: {r: 0, g: 0, b: 0, a: 0}
     - _RimColor: {r: 0.5471698, g: 0.5471698, b: 0.5471698, a: 1}
     - _SpecColor: {r: 1, g: 1, b: 1, a: 1}
     - _Specular: {r: 0.3490566, g: 0.33300328, b: 0.28484336, a: 1}
+  m_BuildTextureStacks: []

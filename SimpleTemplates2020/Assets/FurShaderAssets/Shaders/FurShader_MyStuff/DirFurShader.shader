@@ -16,6 +16,7 @@
 
         //_ForceGlobal ("Force Global", Vector) = (0, 0, 0, 0)
 		_DirTex("DirTex", 2D) = "blue" { }
+		_DirStrength("DirStrength", Range(-1.0, 1.0)) = 0.1
         _ForceLocal ("Force Local", Vector) = (0, 0, 0, 0)
         
         _RimColor ("Rim Color", Color) = (0, 0, 0, 1)
