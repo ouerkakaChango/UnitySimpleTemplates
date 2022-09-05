@@ -55,7 +55,7 @@ Material:
     - _SunDiskStrength: 0.48
     - _SunRadius: 10.6
     - _SunStrength: 0.94
-    - _TimeNormalized: 0.468
+    - _TimeNormalized: 0.166
     m_Colors:
     - _CloudBaseColor: {r: 1, g: 1, b: 1, a: 1}
     - _CloudNormTiling: {r: 2, g: 2, b: 1, a: 1}
