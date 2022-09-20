@@ -92,7 +92,7 @@ fixed4 frag_surface(v2f i): SV_Target
 {
     
     fixed3 worldNormal = normalize(i.worldNormal);
-    fixed3 worldLight = normalize(_WorldSpaceLightPos0.xyz - i.worldPos.xyz);
+fixed3 worldLight = Unity_SafeNormalize(UnityWorldSpaceLightDir(i.worldPos.xyz));
     fixed3 worldView = normalize(_WorldSpaceCameraPos.xyz - i.worldPos.xyz);
     fixed3 worldHalf = normalize(worldView + worldLight);
     
@@ -155,7 +155,7 @@ fixed4 frag_surface_add(v2f i) : SV_Target
 {
 
 	fixed3 worldNormal = normalize(i.worldNormal);
-	fixed3 worldLight = normalize(_WorldSpaceLightPos0.xyz - i.worldPos.xyz);
+fixed3 worldLight = Unity_SafeNormalize(UnityWorldSpaceLightDir(i.worldPos.xyz));
 	fixed3 worldView = normalize(_WorldSpaceCameraPos.xyz - i.worldPos.xyz);
 	fixed3 worldHalf = normalize(worldView + worldLight);
 
@@ -216,7 +216,7 @@ fixed4 frag_base(v2f i): SV_Target
 	//clip(alpha-0.5);
 
     fixed3 worldNormal = normalize(i.worldNormal);
-    fixed3 worldLight = normalize(_WorldSpaceLightPos0.xyz - i.worldPos.xyz);
+	fixed3 worldLight = Unity_SafeNormalize(UnityWorldSpaceLightDir(i.worldPos.xyz));
     fixed3 worldView = normalize(_WorldSpaceCameraPos.xyz - i.worldPos.xyz);
     fixed3 worldHalf = normalize(worldView + worldLight);
 
@@ -261,7 +261,7 @@ fixed4 frag_base(v2f i): SV_Target
 fixed4 frag_base_add(v2f i) : SV_Target
 {
 	fixed3 worldNormal = normalize(i.worldNormal);
-	fixed3 worldLight = normalize(_WorldSpaceLightPos0.xyz - i.worldPos.xyz);
+fixed3 worldLight = Unity_SafeNormalize(UnityWorldSpaceLightDir(i.worldPos.xyz));
 	fixed3 worldView = normalize(_WorldSpaceCameraPos.xyz - i.worldPos.xyz);
 	fixed3 worldHalf = normalize(worldView + worldLight);
 
