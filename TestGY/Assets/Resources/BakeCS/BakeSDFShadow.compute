@@ -1,0 +1,120 @@
+﻿// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel BakeMeshSDFShadow
+
+#include "../../HLSL/RayMath.hlsl"
+#include "../../HLSL/SDFGame/MeshSDF.hlsl"
+#include "../../HLSL/SDFGame/SDFCommonDef.hlsl"
+//#include "../../HLSL/Random/RandUtility.hlsl"
+//#include "../../HLSL/BVH/BVHCommonDef.hlsl"
+
+RWTexture2D<float4> Result;
+StructuredBuffer<float> sdfArr;
+
+float3 startPos;
+float3 unitCount;
+float3 unit;
+
+float3 shadowStartPos;
+float3 shadowUnit;
+
+float softK;
+float2 quadSize;
+float3 quadPos;
+float3 lightDir;
+
+uint InxSDF(uint3 inx)
+{
+	return inx.x + inx.y * (unitCount.x) + inx.z * (unitCount.x * unitCount.y);
+}
+//#########################################################################################################
+void F1(Ray ray, out HitInfo info,
+	in Grid grid, in StructuredBuffer<float> sdfArr)
+{
+	Init(info);
+
+	Ray sampleRay = ray;
+	bool needTrace = true;
+	float3 boxMin = grid.startPos;
+	float3 boxMax = grid.startPos + (grid.unitCount - 1) * grid.unit;
+	if (!IsInBBox(ray.pos, boxMin, boxMax))
+	{
+		CastInfo castInfo = CastBBox(ray, boxMin, boxMax);
+		if (castInfo.bHit)
+		{
+			//!!! offset 0.00..1f is a must!
+			sampleRay.pos += sampleRay.dir * (castInfo.dis + 0.0001f);
+		}
+		else
+		{
+			needTrace = false;
+		}
+	}
+
+	info.bHit = needTrace;
+}
+
+void F2(Ray ray, out HitInfo info,
+	in Grid grid, in StructuredBuffer<float> sdfArr)
+{
+	Init(info);
+
+	info.bHit = length(ray.pos)<1;
+}
+
+void F3(Ray ray, out HitInfo info,
+	in Grid grid, in StructuredBuffer<float> sdfArr)
+{
+	Init(info);
+	FastSDFTraceSphere(ray, info, float3(0, 0.5, 0), 0.5);
+}
+
+void F4(Ray ray, out HitInfo info,
+	in Grid grid, in StructuredBuffer<float> sdfArr)
+{
+	Init(info);
+	CastInfo castInfo = CastBBox(ray, float3(-1,-1,-1), float3(1,1,1));
+	info.bHit = castInfo.bHit;
+}
+
+void F5(Ray ray, out HitInfo info,
+	in Grid grid, in StructuredBuffer<float> sdfArr)
+{
+	Init(info);
+	float3 boxMin = grid.startPos;
+	float3 boxMax = grid.startPos + (grid.unitCount - 1) * grid.unit;
+	CastInfo castInfo = CastBBox(ray, boxMin, boxMax);
+	info.bHit = castInfo.bHit;
+}
+
+[numthreads(8, 8, 1)]
+void BakeMeshSDFShadow(uint3 id : SV_DispatchThreadID)
+{
+	float w, h;
+	Result.GetDimensions(w, h);
+	shadowUnit = float3(quadSize.x/w, 0, quadSize.y/h);
+	//float3 pos = shadowStartPos + float3(id.x, 0, id.y)*shadowUnit;
+	float3 pos = quadPos - 0.5f*float3(quadSize.x,0.0, quadSize.y) + float3(id.x, 0, id.y)*shadowUnit;
+
+	HitInfo minHit;
+	Init(minHit);
+
+	Ray ray;
+	ray.pos = pos;
+	ray.dir = -lightDir;
+
+	Grid grid;
+	grid.startPos = startPos;
+	grid.unitCount = unitCount;
+	grid.unit = unit;
+
+	Ray localRay = ray;
+	localRay .pos += float3(0, 0.001, 0);
+
+	float3 re = 1;
+	re = SoftShadow_TraceMeshSDFLocal(localRay, minHit, softK, grid, sdfArr);
+
+	//??? indirect direct
+	re = lerp(0.05f, 1, re.x);
+	Result[id.xy] = float4(re, 1);
+}
+//#########################################################################################################

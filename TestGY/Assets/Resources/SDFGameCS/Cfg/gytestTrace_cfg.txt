@@ -1,0 +1,37 @@
+valMaps:
+SceneName gytest
+BackGroundColor float3(1,1,1)
+
+Blocks:
+
+###BLOCK ExtraDef
+#include "../../../HLSL/MatLib/CommonBgMat.hlsl"
+###BLOCK
+
+###BLOCK MainRender
+if (minHit.bHit)
+{ 
+	//re = float4(0,1,0,1);
+	re = RenderSceneObj(ray, minHit, mat);
+	//re.rgb *= RenderSceneSDFShadow(minHit);
+}
+else
+{
+	re = 0;
+	//re = (@BackGroundColor);
+	//re = GetEnvIrradiance_equirectangular(envBgTex, ray.dir, true);
+	//re = stars(ray.pos, ray.dir);
+}
+###BLOCK
+
+###BLOCK IndirectRender
+	//re = 0.11;
+	//SetIndirectColor(re, seed, ray, minHit, mat);
+
+	//test
+	//int2 spos = seed.xy;
+	//uint2 size = GetSize(Result);
+	//re = float3(spos/(float2)size,0);
+	//float2 suv = spos/(float2)size;
+
+###BLOCK
