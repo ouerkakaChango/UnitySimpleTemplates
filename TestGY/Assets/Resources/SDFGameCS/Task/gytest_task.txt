@@ -1,11 +1,11 @@
 templates:
-D:/u3dProjects/TestGY/Assets/Resources/SDFGameCS/Template/SDFGameTrace_gytest_Template.txt
-D:/u3dProjects/TestGY/Assets/Resources/SDFGameCS/Template/SDFGameScene_gytest_Template.txt
+C:/Personal/UnitySimpleTemplates/TestGY/Assets/Resources/SDFGameCS/Template/SDFGameTrace_gytest_Template.txt
+C:/Personal/UnitySimpleTemplates/TestGY/Assets/Resources/SDFGameCS/Template/SDFGameScene_gytest_Template.txt
 
 outs:
-D:/u3dProjects/TestGY/Assets/Resources/SDFGameCS/Outs/SDFGameTrace_gytest.compute
-D:/u3dProjects/TestGY/Assets/Resources/SDFGameCS/Outs/SDFGameScene_gytest.hlsl
+C:/Personal/UnitySimpleTemplates/TestGY/Assets/Resources/SDFGameCS/Outs/SDFGameTrace_gytest.compute
+C:/Personal/UnitySimpleTemplates/TestGY/Assets/Resources/SDFGameCS/Outs/SDFGameScene_gytest.hlsl
 
 configs:
-D:/u3dProjects/TestGY/Assets/Resources/SDFGameCS/Cfg/gytestTrace_cfg.txt
-D:/u3dProjects/TestGY/Assets/Resources/SDFGameCS/Cfg/gytestScene_cfg.txt
+C:/Personal/UnitySimpleTemplates/TestGY/Assets/Resources/SDFGameCS/Cfg/gytestTrace_cfg.txt
+C:/Personal/UnitySimpleTemplates/TestGY/Assets/Resources/SDFGameCS/Cfg/gytestScene_cfg.txt
