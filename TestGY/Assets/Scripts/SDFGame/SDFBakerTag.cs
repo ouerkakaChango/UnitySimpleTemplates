@@ -10,6 +10,8 @@ public enum SDFShapeType
     Special,
     Font,
     Slice,
+    Tex3D,
+    GYCloud,
 };
 
 public enum SDFMergeType
@@ -45,6 +47,11 @@ public class SDFBakerTag : MonoBehaviour
     [HideInInspector]
     public float SDF_offset2D = 0.0f;
     //___Slice
+
+    //---Tex3D
+    [HideInInspector]
+    public TexSysTag tex3DTag = null;
+    //___Tex3D
 
     //---Merge
     [HideInInspector]

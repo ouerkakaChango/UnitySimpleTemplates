@@ -1,4 +1,4 @@
-﻿#define OBJNUM 1
+﻿#define OBJNUM 2
 
 #define MaxSDF 1000000000
 #define MaxTraceDis 10
@@ -24,6 +24,8 @@
 float daoScale;
 
 //@@@SDFBakerMgr TexSys
+Texture3D<float> HalfSphereSDF3D;
+Texture3D<float3> HalfSphereNorm3D;
 //@@@
 
 //@@@SDFBakerMgr DyValSys
@@ -35,70 +37,6 @@ float GetPntlightAttenuation(float3 pos, float3 lightPos)
 	float d = length(pos - lightPos);
 	return saturate(1 / (d*d));
 	//return 1 / (1 + 0.01*d + 0.005*d*d);
-}
-
-float DigSeg (float2 q)
-{
-return step (abs (q.x), 0.12) * step (abs (q.y), 0.6);
-}
-
-#define DSG(q) k = kk; kk = k / 2; if (kk * 2 != k) d += DigSeg (q)
-
-float ShowDig (float2 q, int iv)
-{
-float d;
-int k, kk;
-float2 vp = float2 (0.5, 0.5), vm = float2 (-0.5, 0.5), vo = float2 (1., 0.);
-if (iv == -1) k = 8;
-else if (iv < 2) k = (iv == 0) ? 119 : 36;
-else if (iv < 4) k = (iv == 2) ? 93 : 109;
-else if (iv < 6) k = (iv == 4) ? 46 : 107;
-else if (iv < 8) k = (iv == 6) ? 122 : 37;
-else k = (iv == 8) ? 127 : 47;
-q = (q - 0.5);
-d = 0.;
-kk = k;
-DSG (q.yx - vo); DSG (q.xy - vp); DSG (q.xy - vm); DSG (q.yx);
-DSG (q.xy + vm); DSG (q.xy + vp); DSG (q.yx + vo);
-return d;
-}
-
-//float2 mfmod(float2 a, float2 b)
-//{
-// float2 c = frac(abs(a/b))*abs(b);
-// return (a < 0) ? -c : c; /* if ( a < 0 ) c = 0-c */
-//}
-
-float ShowInt(float2 q, int iv, int maxLen=4)
-{
-	//!!!
-	q.x *= -1;
-	int base = 10;
-	int tnum = iv;
-	int resi;
-	float re = 0;
-	float2 offset = float2(2,0);
-	int i=0;
-	if(iv<0)
-	{
-		tnum = abs(tnum);
-	}
-	for(;i<maxLen;i++)
-	{
-		resi = tnum%base;
-		re += ShowDig(q - offset*i,resi);
-		tnum -= resi;
-		tnum /= base;
-		if(tnum == 0)
-		{
-			break;
-		}
-	}
-	if(iv<0)
-	{
-		re += ShowDig(q - offset*(i+1),-1);
-	}
-	return re;
 }
 
 void SH_AddLightDirectional( inout float3 sh[9], in float3 col, in float3 v )
@@ -142,6 +80,16 @@ if(obj == 0 )
 re.albedo = float3(1, 1, 1);
 re.metallic = 0;
 re.roughness = 1;
+re.reflective = 0;
+re.reflect_ST = float2(1, 0);
+}
+else if (obj == 1 )
+{
+re.albedo = float3(1, 1, 1);
+re.metallic = 0;
+re.roughness = 1;
+re.reflective = 0;
+re.reflect_ST = float2(1, 0);
 }
 //@@@
 	return re;
@@ -150,8 +98,9 @@ re.roughness = 1;
 int GetObjRenderMode(int obj)
 {
 //@@@SDFBakerMgr ObjRenderMode
-int renderMode[1];
-renderMode[0] = 333;
+int renderMode[2];
+renderMode[0] = 0;
+renderMode[1] = 333;
 return renderMode[obj];
 //@@@
 }
@@ -164,12 +113,18 @@ float2 GetObjUV(in HitInfo minHit)
 if(inx == 0 )
 {
 }
+else if (inx == 1 )
+{
+}
 	//@@@
 
 	//----------------------------------
 
 	//@@@SDFBakerMgr SpecialObj
 if(inx == 0 )
+{
+}
+else if (inx == 1 )
 {
 inx = -1;
 }
@@ -190,6 +145,9 @@ void GetObjTB(inout float3 T, inout float3 B, in HitInfo minHit)
 if(inx == 0 )
 {
 }
+if(inx == 1 )
+{
+}
 //@@@
 basis_unstable(minHit.N, T, B);
 }
@@ -207,6 +165,9 @@ int inx = minHit.obj;
 
 //@@@SDFBakerMgr SpecialObj
 if(inx == 0 )
+{
+}
+else if (inx == 1 )
 {
 inx = -1;
 }
@@ -249,7 +210,7 @@ if(mode==0)
 float3 lightDirs[1];
 float3 lightColors[1];
 lightDirs[0] = float3(-0.3213938, -0.7660444, 0.5566705);
-lightColors[0] = 3*float3(0.8705883, 0.8784314, 0.882353);
+lightColors[0] = float3(0.8705883, 0.8784314, 0.882353);
 result.rgb = 0.1 * mat.albedo * mat.ao;
 for(int i=0;i<1;i++)
 {
@@ -472,6 +433,10 @@ float re = MaxSDF; //Make sure default is an invalid SDF
 //@@@SDFBakerMgr ObjSDF
 if(inx == 0 )
 {
+re = fbm4(5*p+_Time.y)*0.08+SDFTex3D(p, float3(0, 0, 0), float3(2, 2, 2), HalfSphereSDF3D, TraceThre);
+}
+else if (inx == 1 )
+{
 inx = -1;
 }
 //@@@
@@ -485,9 +450,8 @@ if(inx == -1)
 		float scale1 = 10;
 		float scale2 = 0.1;
 		
-		//float2 uv = SimpleUVFromPos(p, normalize(p-center), float3(1,1,1));
-		r += fbm5(scale1*p.xyz,float3(1,0,0)*_Time.y)*scale2;
-		//r += perlinNoiseFromTex(uv) * scale2;
+		float3 moveDirection = float3(0,1,0);
+		r += fbm4(scale1*p.xyz+moveDirection*_Time.y)*scale2;
 		re = 0.5*SDFSphere(p, center, r);
 	}
 }
@@ -540,8 +504,22 @@ float3 GetObjSDFNormal(int inx, float3 p, in TraceInfo traceInfo, float eplisonS
 
 float3 GetObjNormal(int inx, in Ray ray, in TraceInfo traceInfo)
 {
+float3 p = ray.pos;
+//@@@SDFBakerMgr ObjNormal
+if(inx == 0 )
+{
+return SDFTexNorm3D(p, float3(0, 0, 0), float3(2, 2, 2), HalfSphereNorm3D);
+}
+else if (inx == 1 )
+{
+}
+//@@@
+
 //@@@SDFBakerMgr SpecialObj
 if(inx == 0 )
+{
+}
+else if (inx == 1 )
 {
 inx = -1;
 }

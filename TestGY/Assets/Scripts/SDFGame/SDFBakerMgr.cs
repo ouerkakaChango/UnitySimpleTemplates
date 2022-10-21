@@ -13,6 +13,8 @@ public class SDFBakerMgr : MonoBehaviour
     [HideInInspector]
     public List<string> bakedSDFs = new List<string>();
     [HideInInspector]
+    public List<string> bakedObjNormals = new List<string>();
+    [HideInInspector]
     public List<string> bakedObjUVs = new List<string>();
     [HideInInspector]
     public List<string> bakedObjTBs = new List<string>();
@@ -80,11 +82,19 @@ public class SDFBakerMgr : MonoBehaviour
             }
             else if (tag.shapeType == SDFShapeType.Normal)
             {
-                AddBake(tag.gameObject);
+                AddBake(tag);
             }
             else if (tag.shapeType == SDFShapeType.Slice)
             {
                 AddBakeSlice(tag);
+            }
+            else if (tag.shapeType == SDFShapeType.Tex3D)
+            {
+                AddBakeTex3D(tag);
+            }
+            else if (tag.shapeType == SDFShapeType.GYCloud)
+            {
+                AddBakeGYCloud(tag);
             }
 
             AddBakeMaterial(tag);
@@ -102,6 +112,7 @@ public class SDFBakerMgr : MonoBehaviour
     void DoPreAddAction(int i,SDFBakerTag tag)
     {
         PreAddSDF(i, ref bakedSDFs, tag);
+        PreAdd(i, ref bakedObjNormals);
         PreAdd(i, ref bakedObjUVs);
         PreAdd(i, ref bakedObjTBs,"inx",true);
         PreAdd(i, ref bakedSpecialObjects);
@@ -112,6 +123,7 @@ public class SDFBakerMgr : MonoBehaviour
     void DoPostAddAction(int i)
     {
         PostAdd(i, ref bakedSDFs);
+        PostAdd(i, ref bakedObjNormals);
         PostAdd(i, ref bakedObjUVs);
         PostAdd(i, ref bakedObjTBs);
         PostAdd(i, ref bakedSpecialObjects);
@@ -164,6 +176,7 @@ public class SDFBakerMgr : MonoBehaviour
     {
         bakedBeforeSDF.Clear();
         bakedSDFs.Clear();
+        bakedObjNormals.Clear();
         bakedObjUVs.Clear();
         bakedObjTBs.Clear();
 
@@ -212,10 +225,10 @@ public class SDFBakerMgr : MonoBehaviour
     //    lightDirs[1] = normalize(minHit.P - pntlightPos[x]);
     //    lightColors[1] = pntlightColor[x] * GetPntLightAttenuation(minHit.P,pntlightPos[x]);
 
-    //    result = 0.03 * mat.albedo* mat.ao;
+    //    result.rgb = 0.03 * mat.albedo* mat.ao;
     //  for(int i=0;i<1;i++)
     //  {
-    //      result += PBR_GGX(mat, minHit.N, -ray.dir, -lightDirs[i], lightColors[i]);
+    //      result.rgb += PBR_GGX(mat, minHit.N, -ray.dir, -lightDirs[i], lightColors[i]);
     //}
     //}
 
@@ -240,7 +253,7 @@ public class SDFBakerMgr : MonoBehaviour
                 lightDir = GetLightDir(lightTags[i].gameObject);
                 lightColor = GetLightColor(lightTags[i].gameObject);
                 bakedRenders.Add("  lightDirs[" + i + "] = " + Bake(lightDir) + ";");
-                bakedRenders.Add("  lightColors[" + i + "] = 3*" + Bake(lightColor) + ";");
+                bakedRenders.Add("  lightColors[" + i + "] = " + Bake(lightColor) + ";");
             }
             else if(IsPointLight(lightTags[i].gameObject))
             {
@@ -249,7 +262,7 @@ public class SDFBakerMgr : MonoBehaviour
                 var lightPos = lightTags[i].gameObject.transform.position;
                 lightColor = GetLightColor(lightTags[i].gameObject);
                 bakedRenders.Add("  lightDirs[" + i + "] = normalize(minHit.P - "+Bake(lightPos) +");");
-                bakedRenders.Add("  lightColors[" + i + "] = 3*" + Bake(lightColor) + " * GetPntlightAttenuation(minHit.P, "+Bake(lightPos)+");");
+                bakedRenders.Add("  lightColors[" + i + "] = " + Bake(lightColor) + " * GetPntlightAttenuation(minHit.P, "+Bake(lightPos)+");");
             }
             else
             {
@@ -574,8 +587,89 @@ public class SDFBakerMgr : MonoBehaviour
         bakedSDFs.Add("re = min(re, d);");
     }
 
-    void AddBake(GameObject obj)
+    void AddBakeTex3D(SDFBakerTag tag)
     {
+        //float3 bound = 2;
+        //float3 center = float3(1, 0, 0);
+        //float offset = 0.05 * fbm4(5 * p + _Time.y);
+        //re = SDFTex3D(p, center, bound, SphereTex3D, TraceThre, offset);
+
+        var obj = tag.gameObject;
+        //Vector3 bound = obj.transform.lossyScale * 0.5f;
+        //Vector3 center = obj.transform.position;
+        string centerStr = Bake(obj.transform.position);
+        string boundStr = Bake(obj.transform.lossyScale * 0.5f);
+        var textag = tag.tex3DTag;
+        if(textag==null)
+        {
+            Debug.LogError(obj + " not having tex sys tag");
+            return;
+        }
+        if(textag.plainTextures.Count<1)
+        {
+            Debug.LogError(obj + " texTag at least need 1 plainTex for SDF!!!");
+            return;
+        }
+
+        //---Shape
+        string texName = textag.plainTextures[0].name;
+        bakedSDFs.Add("re = SDFTex3D(p, "+centerStr+", "+ boundStr + ", "+texName+", TraceThre);");
+        //___Shape
+
+        //---Normal
+        //return SDFTexNorm3D(p, center, bound, SphereNorm3D);
+        if (textag.plainTextures.Count >= 2)
+        {
+            string normTexName = textag.plainTextures[1].name;
+            bakedObjNormals.Add("return SDFTexNorm3D(p, "+centerStr+", "+ boundStr + ", "+normTexName+");");
+        }
+        //___Normal
+    }
+
+    //---AddBakeGYCloud
+    void AddBakeGYCloud(SDFBakerTag tag)
+    {
+        //float3 bound = 2;
+        //float3 center = float3(1, 0, 0);
+        //float offset = 0.05 * fbm4(5 * p + _Time.y);
+        //re = SDFTex3D(p, center, bound, SphereTex3D, TraceThre, offset);
+
+        var obj = tag.gameObject;
+        //Vector3 bound = obj.transform.lossyScale * 0.5f;
+        //Vector3 center = obj.transform.position;
+        string centerStr = Bake(obj.transform.position);
+        string boundStr = Bake(obj.transform.lossyScale * 0.5f);
+        var textag = tag.tex3DTag;
+        if (textag == null)
+        {
+            Debug.LogError(obj + " not having tex sys tag");
+            return;
+        }
+        if (textag.plainTextures.Count < 1)
+        {
+            Debug.LogError(obj + " texTag at least need 1 plainTex for SDF!!!");
+            return;
+        }
+
+        //---Shape
+        string texName = textag.plainTextures[0].name;
+        bakedSDFs.Add("re = fbm4(5*p+_Time.y)*0.08+SDFTex3D(p, " + centerStr + ", " + boundStr + ", " + texName + ", TraceThre);");
+        //___Shape
+
+        //---Normal
+        //return SDFTexNorm3D(p, center, bound, SphereNorm3D);
+        if (textag.plainTextures.Count >= 2)
+        {
+            string normTexName = textag.plainTextures[1].name;
+            bakedObjNormals.Add("return SDFTexNorm3D(p, " + centerStr + ", " + boundStr + ", " + normTexName + ");");
+        }
+        //___Normal
+    }
+    //___AddBakeGYCloud
+
+    void AddBake(SDFBakerTag tag)
+    {
+        var obj = tag.gameObject;
         var mf = obj.GetComponent<MeshFilter>();
         var mr = obj.GetComponent<MeshRenderer>();
         if(mf&&mr)
@@ -584,12 +678,12 @@ public class SDFBakerMgr : MonoBehaviour
             //Debug.Log(meshName);
             if(meshName == "Cube")
             {
-                AddBakeCube(obj);
+                AddBakeCube(tag);
                 return;
             }
             else if(meshName == "Sphere")
             {
-                AddBakeSphere(obj);
+                AddBakeSphere(tag);
                 return;
             }
         }
@@ -604,21 +698,41 @@ public class SDFBakerMgr : MonoBehaviour
         Debug.LogError("Nothing Baked!");
     }
 
-    void AddBakeCube(GameObject obj)
+    void AddBakeCube(SDFBakerTag tag)
     {
+        var obj = tag.gameObject;
         float offset = obj.GetComponent<SDFBakerTag>().SDF_offset;
         Vector3 bakeRot = obj.transform.rotation.eulerAngles;
         string center_str = Bake(obj.transform.position);
         string bound_str = Bake(obj.transform.lossyScale * 0.5f);
         string rot_str = Bake(bakeRot);
-        string line = offset + " + SDFBox(p, " + center_str + ", " + bound_str + ", " + rot_str + ")";
-        line = "re = min(re, " + line + ");";
-        bakedSDFs.Add(line);
+
+        var expression = obj.GetComponent<SDFBakerExpression>();
+
+        string line;
+        if (expression == null)
+        {
+            line = offset + " + SDFBox(p, " + center_str + ", " + bound_str + ", " + rot_str + ")";
+            line = "re = min(re, " + line + ");";
+            bakedSDFs.Add(line);
+        }
+        else
+        {
+            bakedSDFs.Add("float3 center = " + center_str + ";");
+            bakedSDFs.Add("float3 bound = " + bound_str + ";");
+            bakedSDFs.Add("float3 rot = " + rot_str + ";");
+            bakedSDFs.Add("float offset = " + offset + ";");
+            bakedSDFs.Add(expression.expressionStr);
+            bakedSDFs.Add("float d = offset + SDFBox(p,center,bound, rot);");
+            bakedSDFs.Add("re = min(re,d);");
+        }
 
         //Bake ObjUV
         //uv = BoxedUV(minHit.P, center, bound, rot);
         line = "uv = BoxedUV(minHit.P, " + center_str + ", " + bound_str + ", " + rot_str + ");";
         bakedObjUVs.Add(line);
+        bakedObjUVs.Add(line);
+        bakedObjUVs.Add("return uv;");
 
         //Bake ObjTB
         //BoxedTB(T,B,minHit.P, center, bound, rot));
@@ -629,13 +743,28 @@ public class SDFBakerMgr : MonoBehaviour
         SetTagMergeType(obj, SDFMergeType.Box);
     }
 
-    void AddBakeSphere(GameObject obj)
+    void AddBakeSphere(SDFBakerTag tag)
     {
+        var obj = tag.gameObject;
+        var expression = obj.GetComponent<SDFBakerExpression>();
         float offset = obj.GetComponent<SDFBakerTag>().SDF_offset;
         string center_str = Bake(obj.transform.position);
-        string line = offset + " + SDFSphere(p, " + center_str + ", " + obj.transform.localScale.x*0.5 + ")";
-        line = "re = min(re, " + line + ");";
-        bakedSDFs.Add(line);
+        if (expression == null)
+        {
+            string line = offset + " + SDFSphere(p, " + center_str + ", " + obj.transform.localScale.x * 0.5 + ")";
+            line = "re = min(re, " + line + ");";
+            bakedSDFs.Add(line);
+        }
+        else
+        {
+            //Debug.Log("expression baked!");
+            bakedSDFs.Add("float3 center = "+center_str+";");
+            bakedSDFs.Add("float r = " + obj.transform.localScale.x * 0.5 + ";");
+            bakedSDFs.Add("float offset = " + offset + ";");
+            bakedSDFs.Add(expression.expressionStr);
+            bakedSDFs.Add("float d = offset + SDFSphere(p,center,r);");
+            bakedSDFs.Add("re = min(re,d);");
+        }
     }
 
     void AddBakeQuadBezier(GameObject obj)
@@ -692,6 +821,8 @@ public class SDFBakerMgr : MonoBehaviour
         bakedMaterials.Add("re.albedo = " + BakeColor3(tag.mat_PBR.albedo) + ";");
         bakedMaterials.Add("re.metallic = " + tag.mat_PBR.metallic + ";");
         bakedMaterials.Add("re.roughness = " + tag.mat_PBR.roughness + ";");
+        bakedMaterials.Add("re.reflective = " + tag.mat_PBR.reflective + ";");
+        bakedMaterials.Add("re.reflect_ST = " + Bake(tag.mat_PBR.reflect_ST) + ";");
         AddBakeMaterialExtra(tag);
     }
 

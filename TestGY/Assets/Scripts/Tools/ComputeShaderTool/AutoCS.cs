@@ -107,14 +107,14 @@ public class AutoCS : MonoBehaviour
         {
             dyValSys.Refresh();
         }
-        for(int i=0;i<systems.Count;i++)
-        {
-            systems[i].Refresh();
-        }
         if(bakerMgr!=null)
         {
             bakerMgr.Bake();
             PreCompile();
+            for (int i = 0; i < systems.Count; i++)
+            {
+                systems[i].Refresh();
+            }
         }
         else
         {
@@ -185,8 +185,9 @@ public class AutoCS : MonoBehaviour
         rangeMap.Add("CheckInnerBound", new List<Vector2Int>());
         rangeMap.Add("ObjEnvTex", new List<Vector2Int>());
         rangeMap.Add("TexSys_EnvTexSettings", new List<Vector2Int>());
+        rangeMap.Add("ObjNormal", new List<Vector2Int>());
 
-        int exInx = 15;
+        int exInx = 16;
         rangeMap.Add("ObjMatLib", new List<Vector2Int>());
         rangeMap.Add("ObjImgAttach", new List<Vector2Int>());
 
@@ -250,6 +251,10 @@ public class AutoCS : MonoBehaviour
             {
                 helper.Replace(range, bakerMgr.bakedSDFs);
             }
+            else if (key == "ObjNormal" && ValidRange(range))
+            {
+                helper.Replace(range, bakerMgr.bakedObjNormals);
+            }
             else if (key == "ObjUV" && ValidRange(range))
             {
                 helper.Replace(range, bakerMgr.bakedObjUVs);
@@ -278,6 +283,7 @@ public class AutoCS : MonoBehaviour
                 }
                 else
                 {
+                    Debug.Log("Warning: no texSys but config has related BLOCK");
                     helper.ClearRange(range);                   
                 }
             }
@@ -289,7 +295,7 @@ public class AutoCS : MonoBehaviour
                 }
                 else
                 {
-                    Debug.Log("Warning: no texSys but config has related BLOCK TexSys_EnvTexSettings");
+                    Debug.Log("Warning: no texSys but config has related BLOCK");
                     helper.ClearRange(range);
                 }
             }

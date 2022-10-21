@@ -120,6 +120,11 @@ bool gtor(float2 a, float2 b)
 	return a.x > b.x || a.y > b.y;
 }
 
+bool gtor(float3 a, float3 b)
+{
+	return a.x > b.x || a.y > b.y || a.z > b.z;
+}
+
 bool gt(float3 a, float3 b)
 {
 	return a.x > b.x && a.y > b.y && a.z > b.z;
@@ -249,9 +254,10 @@ float Time01(float frequency=1.0f,float phi = 0.0f)
 
 SamplerState common_point_repeat_sampler;
 SamplerState common_linear_repeat_sampler;
+SamplerState common_trilinear_repeat_sampler;
 SamplerState common_point_clamp_sampler;
 SamplerState common_linear_clamp_sampler;
-SamplerState common_trilinear_repeat_sampler;
+SamplerState common_trilinear_clamp_sampler;
 
 float2 GetUV(RWTexture2D<float4> dst, uint3 id)
 {
@@ -384,9 +390,19 @@ float3 SampleRGB(in Texture2D tex, float2 uv)
 	return tex.SampleLevel(common_linear_repeat_sampler, uv, 0).rgb;
 }
 
-float3 SampleRGB(in Texture2D<float3> tex, float2 uv)
+float3 SampleRGB(in Texture2D<float3> tex, float2 uv, int mip=0)
 {
-	return tex.SampleLevel(common_linear_repeat_sampler, uv, 0).rgb;
+	return tex.SampleLevel(common_linear_repeat_sampler, uv, mip).rgb;
+}
+
+float3 GetRGB(in Texture2D<float3> tex, float2 uv)
+{
+	return tex.SampleLevel(common_point_repeat_sampler, uv, 0).rgb;
+}
+
+float3 GetRGB(in Texture2D<float4> tex, float2 uv)
+{
+	return tex.SampleLevel(common_point_repeat_sampler, uv, 0).rgb;
 }
 
 float4 SampleRGBA(in Texture2D<float4> tex, float2 uv)
@@ -416,6 +432,20 @@ float3 HSVToRGB_iq(in float3 c)
 float3 HSVToRGB(float3 c) {
 	float4 K = float4(1., 2. / 3., 1. / 3., 3.);
 	return c.z*lerp(K.xxx, saturate(abs(frac(c.x + K.xyz)*6. - K.w) - K.x), c.y);
+}
+
+//glsl version mod,change from cg-language implementation --xc
+float2 gmod(float2 a, float2 b)
+{
+	float2 c = frac(abs(a / b))*abs(b);
+	return c;//(a < 0) ? -c : c;   /* if ( a < 0 ) c = 0-c */
+}
+
+//(edgeLow,edgeHigh,smoothRange,x)
+//(0.1,0.9,0.02,x)
+float SmoothBump(float lo, float hi, float w, float x)
+{
+	return (1. - smoothstep(hi - w, hi + w, x)) * smoothstep(lo - w, lo + w, x);
 }
 
 #endif
