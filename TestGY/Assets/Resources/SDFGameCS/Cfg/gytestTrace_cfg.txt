@@ -8,11 +8,19 @@ Blocks:
 #include "../../../HLSL/MatLib/CommonBgMat.hlsl"
 ###BLOCK
 
+###BLOCK ExtraInfoStruct
+float cloudLength;
+###BLOCK
+
+###BLOCK ExtraInfoStructInit
+extra.cloudLength = 0;
+###BLOCK
+
 ###BLOCK MainRender
 if (minHit.bHit)
 { 
 	//re = float4(0,1,0,1);
-	re = RenderSceneObj(ray, minHit, mat);
+	re = RenderSceneObj(ray, minHit, mat, extra);
 	//re.rgb *= RenderSceneSDFShadow(minHit);
 }
 else

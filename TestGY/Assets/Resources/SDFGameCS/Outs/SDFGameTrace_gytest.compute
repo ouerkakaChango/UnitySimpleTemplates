@@ -6,6 +6,18 @@
 #include "../../../HLSL/PBR/PBRCommonDef.hlsl"
 #include "../../../HLSL/MatLib/CommonBgMat.hlsl"
 
+struct ExtraInfo
+{
+	float3 seed;
+float cloudLength;
+};
+
+void Init(out ExtraInfo extra)
+{
+	extra.seed = 0;
+extra.cloudLength = 0;
+}
+
 int w;
 int h;
 
@@ -36,19 +48,19 @@ RWTexture2D<float4> IndirectResult;
 #include "SDFGameScene_gytest.hlsl"
 //#########################################################################################################
 
-float4 GetSDFGameColor(in Ray ray, out HitInfo minHit, out Material_PBR mat)
+float4 GetSDFGameColor(in Ray ray, out HitInfo minHit, out Material_PBR mat, inout ExtraInfo extra)
 {
 	Init(mat);
 	float4 re = 0;
 	//---Trace
 	Init(minHit);
-	TraceScene(ray, minHit);
+	TraceScene(ray, minHit, extra);
 	//___Trace
 
 if (minHit.bHit)
 {
 	//re = float4(0,1,0,1);
-	re = RenderSceneObj(ray, minHit, mat);
+	re = RenderSceneObj(ray, minHit, mat, extra);
 	//re.rgb *= RenderSceneSDFShadow(minHit);
 }
 else
@@ -93,7 +105,12 @@ void Render(uint3 id : SV_DispatchThreadID)
 
 	float3 camFoward = normalize(cross(screenU,screenV));
 
-	float3 seed = float3(id.xy,frameID);
+	HitInfo minHit;
+	Material_PBR mat;
+	ExtraInfo extra;
+	Init(extra);
+	extra.seed = float3(id.xy,frameID);
+
 	suv = float2(id.x/(float)w,id.y/(float)h);
 
 	[unroll(SSAA_edge)]
@@ -112,9 +129,7 @@ void Render(uint3 id : SV_DispatchThreadID)
 			{
 				ray.dir = normalize(ray.pos - eyePos);
 			}
-			HitInfo minHit;
-			Material_PBR mat;
-			SSAA_colors[i - 1 + (j - 1)* SSAA_edge] = GetSDFGameColor(ray, minHit, mat);
+			SSAA_colors[i - 1 + (j - 1)* SSAA_edge] = GetSDFGameColor(ray, minHit, mat, extra);
 			//if(useIndirectRT)
 			//{
 			//	SSAA_indirColors[i - 1 + (j - 1)* SSAA_edge] = GetSDFGameIndirColor(ray,seed,minHit,mat);

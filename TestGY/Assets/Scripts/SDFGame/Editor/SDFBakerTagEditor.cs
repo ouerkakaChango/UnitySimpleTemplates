@@ -57,6 +57,13 @@ public class SDFBakerTagEditor : Editor
         {
             SerializedProperty tex3DTag = serializedObject.FindProperty("tex3DTag");
             EditorGUILayout.PropertyField(tex3DTag, new GUIContent("tex3DTag"), true);
+            if(type == SDFShapeType.GYCloud)
+            {
+                SerializedProperty noiseLength = serializedObject.FindProperty("noiseLength");
+                EditorGUILayout.PropertyField(noiseLength, new GUIContent("noiseLength"), true);
+                SerializedProperty noiseFrequency = serializedObject.FindProperty("noiseFrequency");
+                EditorGUILayout.PropertyField(noiseFrequency, new GUIContent("noiseFrequency"), true);
+            }
         }
 
         showMergeTag = EditorGUILayout.Foldout(showMergeTag, "Merge");

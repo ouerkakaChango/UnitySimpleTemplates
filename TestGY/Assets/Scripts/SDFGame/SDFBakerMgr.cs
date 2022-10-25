@@ -629,10 +629,6 @@ public class SDFBakerMgr : MonoBehaviour
     //---AddBakeGYCloud
     void AddBakeGYCloud(SDFBakerTag tag)
     {
-        //float3 bound = 2;
-        //float3 center = float3(1, 0, 0);
-        //float offset = 0.05 * fbm4(5 * p + _Time.y);
-        //re = SDFTex3D(p, center, bound, SphereTex3D, TraceThre, offset);
 
         var obj = tag.gameObject;
         //Vector3 bound = obj.transform.lossyScale * 0.5f;
@@ -652,8 +648,21 @@ public class SDFBakerMgr : MonoBehaviour
         }
 
         //---Shape
-        string texName = textag.plainTextures[0].name;
-        bakedSDFs.Add("re = fbm4(5*p+_Time.y)*0.08+SDFTex3D(p, " + centerStr + ", " + boundStr + ", " + texName + ", TraceThre);");
+        var expression = obj.GetComponent<SDFBakerExpression>();
+        if (expression == null)
+        {
+            //extra.cloudLength = fbm4_01(5 * p + _Time.y);
+            //re = 0 + extra.cloudLength * 0.08 + SDFTex3D(p, float3(0, 0, 0), float3(2, 2, 2), HalfSphereSDF3D, TraceThre);
+            //extra.cloudLength = (1 - extra.cloudLength);
+            string texName = textag.plainTextures[0].name;
+            bakedSDFs.Add("extra.cloudLength = fbm4_01(" + tag.noiseFrequency + "*p+_Time.y);");
+            bakedSDFs.Add("re = "+tag.SDF_offset+ "+ extra.cloudLength * "+ tag.noiseLength + " + SDFTex3D(p, " + centerStr + ", " + boundStr + ", " + texName + ", TraceThre);");
+            bakedSDFs.Add("extra.cloudLength = 1 - extra.cloudLength;");
+        }
+        else
+        {
+            Debug.LogError("Not Handle!");
+        }
         //___Shape
 
         //---Normal

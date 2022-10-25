@@ -26,7 +26,7 @@ void basis_unstable(in float3 n, out float3 f, out float3 r)
 }
 
 //https://iquilezles.org/articles/smin/
-float smin(float a, float b, float k = 0.1)
+float smin(float a, float b, float k = 0.8)
 {
 	float h = clamp(0.5 + 0.5*(b - a) / k, 0.0, 1.0);
 	return lerp(b, a, h) - k * h*(1.0 - h);
@@ -328,9 +328,12 @@ float3 SDFTexNorm3D(float3 p, float3 center, float3 bound, Texture3D<float3> SDF
 	float3 q = p - center;
 	if (gtor(abs(q), bound))
 	{
-		return 0;
+		q = normalize(q)*0.5;
 	}
-	q /= (bound.x/0.5);
+	else
+	{
+		q /= (bound.x / 0.5);
+	}
 	return SDFNorm3D.SampleLevel(common_linear_clamp_sampler, q + 0.5, 0).rgb;
 }
 

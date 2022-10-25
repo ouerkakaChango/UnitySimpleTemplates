@@ -26,7 +26,6 @@ struct HitInfo
 	int obj;
 	float3 N;
 	float3 P;
-	float cloudLength;
 };
 
 struct TraceInfo
@@ -64,7 +63,6 @@ void Init(out HitInfo re)
 	re.obj = -1;
 	re.N = 0;
 	re.P = 0;
-	re.cloudLength = 0;
 }
 
 void Init(out TraceInfo re, float maxSDF = 1000000)
@@ -95,7 +93,6 @@ void Assgin(out HitInfo re, HitInfo hit)
 	re.obj = hit.obj;
 	re.N = hit.N;
 	re.P = hit.P;
-	re.cloudLength = hit.cloudLength;
 }
 
 void Update(inout TraceInfo traceInfo, float sdf)

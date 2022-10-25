@@ -53,6 +53,13 @@ public class SDFBakerTag : MonoBehaviour
     public TexSysTag tex3DTag = null;
     //___Tex3D
 
+    //---GYCloud
+    [HideInInspector]
+    public float noiseLength = 0.08f;
+    [HideInInspector]
+    public float noiseFrequency = 5.0f;
+    //___GYCloud
+
     //---Merge
     [HideInInspector]
     public SDFMergeType mergeType = SDFMergeType.None;

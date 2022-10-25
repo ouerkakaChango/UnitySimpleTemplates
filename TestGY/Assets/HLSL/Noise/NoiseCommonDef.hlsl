@@ -67,24 +67,6 @@ float noise3(in float3 p) {
 	return 0.5*(re + 1);
 }
 
-float fbm5(in float3 p, float3 t)
-{
-	p = p + t;
-	//float n = 0.0;
-	//n += 0.25*noise3(p*0.1*1.0);
-	//n += 0.25*noise3(p*0.1*5.0);
-	//n += 0.25*noise3(p*0.1*30.0);
-	//n += 0.25*noise3(p*0.1*40.0);
-	//return n;
-
-	float n = 0.0;
-	n += 1.000*noise(p*1.0);
-	n += 0.500*noise(p*2.0);
-	n += 0.250*noise(p*4.0);
-	n += 0.125*noise(p*8.0);
-	return n;
-}
-
 float fbm4(in float3 p)
 {
 	float n = 0.0;
@@ -93,6 +75,11 @@ float fbm4(in float3 p)
 	n += 0.250*noise(p*4.0);
 	n += 0.125*noise(p*8.0);
 	return n;
+}
+
+float fbm4_01(in float3 p)
+{
+	return fbm4(p) / (1 + 0.5 + 0.25 + 0.125);
 }
 
 float fbm3(in float3 p)
