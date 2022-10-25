@@ -9,12 +9,14 @@
 struct ExtraInfo
 {
 	float3 seed;
+	float screenDepth;
 float cloudLength;
 };
 
 void Init(out ExtraInfo extra)
 {
 	extra.seed = 0;
+	extra.screenDepth = 0;
 extra.cloudLength = 0;
 }
 
@@ -43,6 +45,7 @@ float3 screenV;
 
 RWTexture2D<float4> Result;
 RWTexture2D<float4> IndirectResult;
+RWTexture2D<float> DepthRT;
 
 //#########################################################################################################
 #include "SDFGameScene_gytest.hlsl"
@@ -102,6 +105,7 @@ void Render(uint3 id : SV_DispatchThreadID)
 	float SSAA_unitDis = 1.0f / SSAA_edge;
 	float4 SSAA_colors[SSAA_num];
 	float3 SSAA_indirColors[SSAA_num];
+	float SSAA_Depth[SSAA_num];
 
 	float3 camFoward = normalize(cross(screenU,screenV));
 
@@ -130,6 +134,7 @@ void Render(uint3 id : SV_DispatchThreadID)
 				ray.dir = normalize(ray.pos - eyePos);
 			}
 			SSAA_colors[i - 1 + (j - 1)* SSAA_edge] = GetSDFGameColor(ray, minHit, mat, extra);
+			SSAA_Depth[i - 1 + (j - 1)* SSAA_edge] = extra.screenDepth;
 			//if(useIndirectRT)
 			//{
 			//	SSAA_indirColors[i - 1 + (j - 1)* SSAA_edge] = GetSDFGameIndirColor(ray,seed,minHit,mat);
@@ -155,4 +160,12 @@ void Render(uint3 id : SV_DispatchThreadID)
 	//re /= (float)SSAA_num;
 	//IndirectResult[id.xy] = float4(re, 1);
 	//}
+
+	float re_depth = 0;
+	for (int i = 0; i < SSAA_num; i++)
+	{
+		re_depth += SSAA_Depth[i];
+	}
+	re /= (float)SSAA_num;
+	DepthRT[id.xy] = re_depth;
 }

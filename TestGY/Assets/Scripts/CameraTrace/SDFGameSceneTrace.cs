@@ -168,6 +168,7 @@ public class SDFGameSceneTrace : MonoBehaviour
 
     //---DepthRT
     public RenderTexture rt_camDepth, rt1,rt2;
+    public RenderTexture rt_gyDepth;
     //___
 
     bool hasInited = false;
@@ -250,35 +251,6 @@ public class SDFGameSceneTrace : MonoBehaviour
         lastPos = transform.position;
         lastRot = transform.rotation;
     }
-
-    //private void OnRenderImage(RenderTexture source, RenderTexture destination)
-    //{
-        //MainRenderFunc();
-        //if (rt == null)
-        //{
-        //    return;
-        //}
-        //if (useFSR)
-        //{
-        //    FSRProcessor.ProcessRT(ref cs_FSR, ref rt, ref easuRT, ref finalRT);
-        //    Graphics.Blit(finalRT, (RenderTexture)null);
-        //}
-        //else
-        //{
-        //    Graphics.Blit((RenderTexture)source, trt);
-        //    CopyDepth(ref source, ref rt_camDepth);
-        //    //###########
-        //    //### compute
-        //    int kInx = cs_blendGYResult.FindKernel("BlendBAlpha");
-        //    cs_blendGYResult.SetTexture(kInx, "Result", rt_gyFinal);
-        //    cs_blendGYResult.SetTexture(kInx, "TexA", trt);
-        //    cs_blendGYResult.SetTexture(kInx, "TexB", rt);
-        //    cs_blendGYResult.Dispatch(kInx, renderSize.x / CoreX, renderSize.y / CoreY, 1);
-        //    //### compute
-        //    //###########
-        //    Graphics.Blit(rt_gyFinal, (RenderTexture)null);
-        //}
-    //}
 
     private void OnDisable()
     {
@@ -450,6 +422,7 @@ public class SDFGameSceneTrace : MonoBehaviour
             computeShader.SetTexture(kInx, "Result", rTex);
             //!!! 反正不用到，但是参数要传进去，省得变shader代码
             computeShader.SetTexture(kInx, "IndirectResult", uselessRT);
+            computeShader.SetTexture(kInx, "DepthRT", rt_gyDepth);
         }
 
         camParam.InsertParamToComputeShader(ref computeShader);
@@ -544,50 +517,10 @@ public class SDFGameSceneTrace : MonoBehaviour
     //@@@
     private void OnGUI()
     {
-        //GUI.Label(new Rect(50, 100, 300, 50), "Has Draw: " + hasDraw);
-        //if (GUI.Button(new Rect(0, 0, 100, 50), "GoRender!"))
-        //{
-        //    Co_GoIter = GoIter();
-        //    StartCoroutine(Co_GoIter);
-        //}
+
     }
 
-    //IEnumerator GoIter()
-    //{
-    //    while(true)
-    //    {
-    //        fpsTimer.Start();
-    //        var cam = gameObject.GetComponent<Camera>();
-    //        if (trt == null)
-    //        {
-    //            trt = new RenderTexture(maincamParam.w, maincamParam.h, 0, RenderTextureFormat.ARGBFloat);
-    //            trt.enableRandomWrite = true;
-    //            trt.Create();
-    //
-    //            rt_gyFinal = new RenderTexture(maincamParam.w, maincamParam.h, 0, RenderTextureFormat.ARGBFloat);
-    //            rt_gyFinal.enableRandomWrite = true;
-    //            rt_gyFinal.Create();
-    //
-    //            cs_blendGYResult = (ComputeShader)Resources.Load("LightingCS/BlendFinal");
-    //            if(cs_blendGYResult==null)
-    //            {
-    //                Debug.LogError("Error loading cs_blendGYResult");
-    //            }
-    //            //Debug.Log("@@@@@@@@@@@@@@@@");
-    //        }
-    //        if (cam == null)
-    //        {
-    //            Debug.LogError("No Camera with SDFGameSceneTrace");
-    //        }
-    //        else
-    //        {
-    //            RenderCamToRT(ref rt, ref cam, maincamParam);
-    //        }
-    //        yield return null;
-    //        fps = fpsTimer.GetFPS();
-    //        frameID += 1;
-    //    }
-    //}
+
 
     void MainRenderFunc()
     {
@@ -598,9 +531,8 @@ public class SDFGameSceneTrace : MonoBehaviour
             trt.enableRandomWrite = true;
             trt.Create();
 
-            rt_gyFinal = new RenderTexture(maincamParam.w, maincamParam.h, 0, RenderTextureFormat.ARGBFloat);
-            rt_gyFinal.enableRandomWrite = true;
-            rt_gyFinal.Create();
+            CreateRT(ref rt_gyFinal,1, maincamParam.w, maincamParam.h);
+            CreateRT(ref rt_gyDepth, 1, maincamParam.w, maincamParam.h,0,RenderTextureFormat.RFloat);
 
             cs_blendGYResult = (ComputeShader)Resources.Load("LightingCS/BlendFinal");
             if (cs_blendGYResult == null)

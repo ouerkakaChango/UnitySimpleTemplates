@@ -238,6 +238,7 @@ void TraceScene(Ray ray, out HitInfo info, inout ExtraInfo extra)
 			info.obj = objInx;
 			info.N = GetObjNormal(objInx, ray, traceInfo, extra);
 			info.P = ray.pos;
+			extra.screenDepth = traceInfo.traceSum;
 			break;
 		}
 		ray.pos += sdf * ray.dir;
