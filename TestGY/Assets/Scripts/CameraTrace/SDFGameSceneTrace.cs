@@ -11,7 +11,7 @@ using static MathHelper.XMathFunc;
 public abstract class SDFCameraParam
 {
     public int w = 1024, h = 720;
-    public int camType = 0;
+    public int camType = 0;//0:normal 1:orthogonal 2:Cubemap-SingleFaceCam
     public int camGammaMode = 0;
 
     public abstract void UpdateCamParam(ref Camera cam, float daoScale);
@@ -77,24 +77,27 @@ public class SDFGameCameraParam : SDFCameraParam
     {
         var obj = cam.gameObject;
 
-        //大概在Unity场景中对比了一下渲染大小，定下了合理的像素晶元大小（也就是根据了w,h和原始的cam nf,FOV,尝试出合适的pixW）
-        pixW = 0.000485f;
-        pixH = pixW;
-        pixW *= daoScale;
-        pixH *= daoScale;
-
         var near = cam.nearClipPlane;
         near *= daoScale;
-        
-        if(camType==2)
+
+        //根据near和fov算出pixH
+        float verticleFOV = cam.fieldOfView / 180.0f*Mathf.PI;
+
+        //tan(half) = (0.5*H)/(near)
+        float screenH = Mathf.Tan(verticleFOV * 0.5f) * near * 2;
+        float screenW = screenH * cam.aspect;
+
+        pixW = screenW / w;
+        pixH = screenH / h;
+
+        if (camType==2)
         {
             near = pixW * w /2.0f;
         }
 
-        var camPos = obj.transform.position;
+        eyePos = obj.transform.position;
         var camForward = obj.transform.forward;
-        eyePos = camPos;
-        var screenPos = camPos + near * camForward;
+        var screenPos = eyePos + near * camForward;
         screenU = obj.transform.right;
         screenV = obj.transform.up;
 
@@ -163,6 +166,10 @@ public class SDFGameSceneTrace : MonoBehaviour
     public KeyboardInputer keyboard;
     //___
 
+    //---DepthRT
+    public RenderTexture rt_camDepth, rt1,rt2;
+    //___
+
     bool hasInited = false;
     //##########################################################################################
     void Start()
@@ -178,6 +185,7 @@ public class SDFGameSceneTrace : MonoBehaviour
     { 
         //ReInit();
     }
+    RenderBuffer colorBuffer;
 
     void ReInit()
     {
@@ -187,6 +195,13 @@ public class SDFGameSceneTrace : MonoBehaviour
         //}
         //else
         {
+            var cam = GetComponent<Camera>();
+            rt1 = new RenderTexture(renderSize.x,renderSize.y, 0,RenderTextureFormat.ARGBFloat);
+            rt2 = new RenderTexture(renderSize.x, renderSize.y, 24, RenderTextureFormat.Depth);
+            cam.SetTargetBuffers(rt1.colorBuffer, rt2.depthBuffer);
+
+            CreateRT(ref rt_camDepth, 1, renderSize.x, renderSize.y, 0, RenderTextureFormat.RFloat);
+
             maincamParam = new SDFGameCameraParam();
             maincamParam.w = renderSize.x;
             maincamParam.h = renderSize.y;
@@ -236,8 +251,45 @@ public class SDFGameSceneTrace : MonoBehaviour
         lastRot = transform.rotation;
     }
 
+    //private void OnRenderImage(RenderTexture source, RenderTexture destination)
+    //{
+        //MainRenderFunc();
+        //if (rt == null)
+        //{
+        //    return;
+        //}
+        //if (useFSR)
+        //{
+        //    FSRProcessor.ProcessRT(ref cs_FSR, ref rt, ref easuRT, ref finalRT);
+        //    Graphics.Blit(finalRT, (RenderTexture)null);
+        //}
+        //else
+        //{
+        //    Graphics.Blit((RenderTexture)source, trt);
+        //    CopyDepth(ref source, ref rt_camDepth);
+        //    //###########
+        //    //### compute
+        //    int kInx = cs_blendGYResult.FindKernel("BlendBAlpha");
+        //    cs_blendGYResult.SetTexture(kInx, "Result", rt_gyFinal);
+        //    cs_blendGYResult.SetTexture(kInx, "TexA", trt);
+        //    cs_blendGYResult.SetTexture(kInx, "TexB", rt);
+        //    cs_blendGYResult.Dispatch(kInx, renderSize.x / CoreX, renderSize.y / CoreY, 1);
+        //    //### compute
+        //    //###########
+        //    Graphics.Blit(rt_gyFinal, (RenderTexture)null);
+        //}
+    //}
+
+    private void OnDisable()
+    {
+        //SafeDispose(buffer_tris);
+    }
+
+    //private void OnPostRender()
     private void OnRenderImage(RenderTexture source, RenderTexture destination)
     {
+        //Graphics.Blit(rt1, null as RenderTexture);
+        //return;
         MainRenderFunc();
         if (rt == null)
         {
@@ -250,7 +302,8 @@ public class SDFGameSceneTrace : MonoBehaviour
         }
         else
         {
-            Graphics.Blit((RenderTexture)source, trt);
+            Graphics.Blit((RenderTexture)rt1, trt);
+            CopyDepth(ref rt2, ref rt_camDepth);
             //###########
             //### compute
             int kInx = cs_blendGYResult.FindKernel("BlendBAlpha");
@@ -260,13 +313,8 @@ public class SDFGameSceneTrace : MonoBehaviour
             cs_blendGYResult.Dispatch(kInx, renderSize.x / CoreX, renderSize.y / CoreY, 1);
             //### compute
             //###########
-            Graphics.Blit(rt_gyFinal, (RenderTexture)null);
+            Graphics.Blit(rt_gyFinal, destination);
         }
-    }
-
-    private void OnDisable()
-    {
-        //SafeDispose(buffer_tris);
     }
 
     //##################################################################################################
@@ -471,9 +519,9 @@ public class SDFGameSceneTrace : MonoBehaviour
         autoCS.Generate();
     }
 
-    void CreateRT(ref RenderTexture rTex, float scale, int w, int h, int depth = 0)
+    void CreateRT(ref RenderTexture rTex, float scale, int w, int h, int depth = 0, RenderTextureFormat format = RenderTextureFormat.ARGBFloat)
     {
-        rTex = new RenderTexture((int)(w* scale), (int)(h* scale), depth, RenderTextureFormat.ARGBFloat);
+        rTex = new RenderTexture((int)(w* scale), (int)(h* scale), depth, format);
         rTex.enableRandomWrite = true;
         rTex.Create();
     }
@@ -577,5 +625,11 @@ public class SDFGameSceneTrace : MonoBehaviour
         Init(ref rTex, camParam);
         camParam.UpdateCamParam(ref cam, daoScale);
         Compute_Render(ref cs, ref rTex, camParam);
+    }
+
+    public Material depthCopyMat;
+    void CopyDepth(ref RenderTexture src, ref RenderTexture tar)
+    {
+        Graphics.Blit(src, tar);
     }
 }

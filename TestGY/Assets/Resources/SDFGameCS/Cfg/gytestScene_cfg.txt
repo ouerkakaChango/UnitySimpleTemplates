@@ -323,7 +323,7 @@ float re = MaxSDF; //Make sure default is an invalid SDF
 if(inx == 0 )
 {
 extra.cloudLength = fbm4_01(5*p+_Time.y);
-re = 0+ extra.cloudLength * 0.2 + SDFTex3D(p, float3(9.65, 7.39, 0), float3(5, 5, 5), HalfSphereSDF3D, TraceThre);
+re = 0+ extra.cloudLength * 0.2 + SDFTex3D(p, float3(0, 0, -5), float3(5, 5, 5), HalfSphereSDF3D, TraceThre);
 extra.cloudLength = 1 - extra.cloudLength;
 }
 //@@@
