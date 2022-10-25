@@ -328,7 +328,7 @@ float3 SDFTexNorm3D(float3 p, float3 center, float3 bound, Texture3D<float3> SDF
 	float3 q = p - center;
 	if (gtor(abs(q), bound))
 	{
-		q = normalize(q)*0.5;
+		//q = normalize(q)*0.5;
 	}
 	else
 	{

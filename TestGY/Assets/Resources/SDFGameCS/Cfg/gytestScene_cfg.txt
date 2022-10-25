@@ -1,6 +1,6 @@
 valMaps:
 //@@@SDFBakerMgr ValMaps
-ObjNum 2
+ObjNum 1
 //@@@
 TraceThre 0.001
 NormalEpsilon 0.01
@@ -75,22 +75,13 @@ re.roughness = 1;
 re.reflective = 0;
 re.reflect_ST = float2(1, 0);
 }
-else if (obj == 1 )
-{
-re.albedo = float3(1, 1, 1);
-re.metallic = 0;
-re.roughness = 1;
-re.reflective = 0;
-re.reflect_ST = float2(1, 0);
-}
 //@@@
 ###BLOCK
 
 ###BLOCK ObjRenderMode
 //@@@SDFBakerMgr ObjRenderMode
-int renderMode[2];
+int renderMode[1];
 renderMode[0] = 444;
-renderMode[1] = 444;
 return renderMode[obj];
 //@@@
 ###BLOCK
@@ -102,18 +93,12 @@ return renderMode[obj];
 if(inx == 0 )
 {
 }
-else if (inx == 1 )
-{
-}
 	//@@@
 
 	//----------------------------------
 
 	//@@@SDFBakerMgr SpecialObj
 if(inx == 0 )
-{
-}
-else if (inx == 1 )
 {
 }
 	//@@@
@@ -127,9 +112,6 @@ return uv;
 ###BLOCK ObjTB
 //@@@SDFBakerMgr ObjTB
 if(inx == 0 )
-{
-}
-if(inx == 1 )
 {
 }
 //@@@
@@ -148,9 +130,6 @@ int inx = minHit.obj;
 
 //@@@SDFBakerMgr SpecialObj
 if(inx == 0 )
-{
-}
-else if (inx == 1 )
 {
 }
 //@@@
@@ -205,65 +184,13 @@ else if (mode == 3)
 	//lightmap mode
 	//result.rgb = mat.albedo;
 }
-else if (mode == 333)
-{
-////??? test GYCloudRenderMode
-//  float3 lightDirs[1];
-//  float3 lightColors[1];
-//  lightDirs[0] = float3(-0.3213938, -0.7660444, 0.5566705);
-//  lightColors[0] = float3(0.8705883, 0.8784314, 0.882353);
-//
-//  float3 N = lerp(normalize(minHit.P-float3(3,0,0)), minHit.N, 0);
-//  float3 L = normalize(-lightDirs[0]);
-//  float3 V = normalize(-ray.dir);
-//
-//  float NdotL = max(0, dot(N,L));
-//  float cloudHeight = 0.1;//0.1*(1+0.5+0.25+0.125);
-//  float clipRate = (minHit.cloudLength/cloudHeight);
-//  //float clipRate = minHit.cloudLength;
-//  float ori = clipRate;
-//  float smoothNdotL = saturate(pow(NdotL,2-clipRate));
-//
-//  float BackSSSStrength = 0.5;
-//  float3 backLitDir = N*BackSSSStrength+L;
-//  float backSSS = saturate(dot(V,-backLitDir));
-//  backSSS = saturate(pow(backSSS,clipRate*10)*10);
-//  
-//  float NdotV = max(0, dot(N,V));
-//  float smoothNdotV = saturate(pow(NdotV, 2 - clipRate));
-//  
-//  float sha = 1.0;
-//  
-//	float final =  saturate(smoothNdotV*0.0 + sha * saturate(lerp(smoothNdotL,ori,0.5)+backSSS)*(1-NdotV*0.5));
-//
-//	float4 SHA[3];
-//	SHA[0] = float4(0.007252,-0.005682,0.012560, 0.169953);
-//	SHA[1] = float4(0.011403,0.041343,-0.019753, 0.211334);
-//	SHA[2] = float4(0.019656,0.127484,-0.034053, 0.289207);
-//	//SHA[0] = 0;
-//	//SHA[1] = 0;
-//	//SHA[2] = float4(0,0,0,1);
-//	float4 SHB[3];
-//	SHB[0] = float4(0.005699,-0.009872,0.030990, -0.010436);
-//	SHB[1] = float4(0.009111,-0.015783,0.043139, -0.015223);
-//	SHB[2] = float4(0.016365,-0.028334,0.053146, -0.022085);
-//	//SHB[0] = 0;
-//	//SHB[1] = 0;
-//	//SHB[2] = 0;
-//	float3 SHC = float3(0.025035,0.034436,0.040465);
-//	//float3 SHC = 0;
-//
-//	float3 indirCol = ShadeSH9(N,SHA,SHB,SHC);
-//
-//	result.rgb = indirCol+lightColors[0]*final;
-}
 else if (mode == 444)
 {
     //??? test GYCloudRenderMode
     float3 lightDirs[1];
-    float3 lightColors[1];
-    lightDirs[0] = float3(-0.3213938, -0.7660444, 0.5566705);
-    lightColors[0] = float3(0.8705883, 0.8784314, 0.882353);
+  float3 lightColors[1];
+  lightDirs[0] = float3(-0.3213938, -0.7660444, 0.5566705);
+  lightColors[0] = float3(0.8705883, 0.8784314, 0.882353);
 
     float3 N = minHit.N;
     float3 L = normalize(-lightDirs[0]);
@@ -274,17 +201,17 @@ else if (mode == 444)
     float clipRate = ori;
     float smoothNdotL = saturate(pow(NdotL,2-clipRate));
   
-    float BackSSSStrength = 0.9;
+    float BackSSSStrength = 1.0;
     float3 backLitDir = N*BackSSSStrength+L;
     float backSSS = saturate(dot(V,-backLitDir));
-    backSSS = saturate(pow(backSSS,clipRate*10)*10);
+    backSSS = 0.3*saturate(pow(backSSS,clipRate*10)*10);
     
     float NdotV = max(0, dot(N,V));
     float smoothNdotV = saturate(pow(NdotV, 2 - clipRate));
     
     float sha = 1.0;
     
-  	float final =  saturate(smoothNdotV*0.0 + sha * saturate(lerp(smoothNdotL,ori,0.5)+backSSS)*(1-NdotV*0.5));
+  	float final =  saturate(smoothNdotV*0 + sha * saturate(lerp(smoothNdotL,ori,0.0)+backSSS)*(1-NdotV*0.5));
 
 	float4 SHA[3];
 	SHA[0] = float4(0.007252,-0.005682,0.012560, 0.169953);
@@ -340,7 +267,7 @@ if(true)
 int lightType[1];
 lightType[0] = 0;
 float3 lightPos[1];
-lightPos[0] = float3(0, 3, 0);
+lightPos[0] = float3(0, 0, 0);
 float3 lightDirs[1];
 lightDirs[0] = float3(-0.3213938, -0.7660444, 0.5566705);
 int shadowType[1];
@@ -396,13 +323,7 @@ float re = MaxSDF; //Make sure default is an invalid SDF
 if(inx == 0 )
 {
 extra.cloudLength = fbm4_01(5*p+_Time.y);
-re = 0+ extra.cloudLength * 0.2 + SDFTex3D(p, float3(2.07, 0, 0), float3(2, 2, 2), HalfSphereSDF3D, TraceThre);
-extra.cloudLength = 1 - extra.cloudLength;
-}
-else if (inx == 1 )
-{
-extra.cloudLength = fbm4_01(5*p+_Time.y);
-re = 0+ extra.cloudLength * 0.2 + SDFTex3D(p, float3(0, 0, 0), float3(2, 2, 2), HalfSphereSDF3D, TraceThre);
+re = 0+ extra.cloudLength * 0.2 + SDFTex3D(p, float3(9.65, 7.39, 0), float3(5, 5, 5), HalfSphereSDF3D, TraceThre);
 extra.cloudLength = 1 - extra.cloudLength;
 }
 //@@@
@@ -434,19 +355,12 @@ float3 p = ray.pos;
 //@@@SDFBakerMgr ObjNormal
 if(inx == 0 )
 {
-return SDFTexNorm3D(p, float3(2.07, 0, 0), float3(2, 2, 2), HalfSphereNorm3D);
-}
-else if (inx == 1 )
-{
-return SDFTexNorm3D(p, float3(0, 0, 0), float3(2, 2, 2), HalfSphereNorm3D);
+return GetObjSDFNormal(inx, ray.pos, traceInfo, extra, 100);
 }
 //@@@
 
 //@@@SDFBakerMgr SpecialObj
 if(inx == 0 )
-{
-}
-else if (inx == 1 )
 {
 }
 //@@@

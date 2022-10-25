@@ -151,6 +151,7 @@ Transform:
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: -9.350815, y: -8.573769, z: 6.321093}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1196838529}
   m_RootOrder: 1
@@ -229,6 +230,7 @@ Transform:
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: -9.350815, y: -8.573769, z: 6.321093}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1196838529}
   m_RootOrder: 0
@@ -308,8 +310,9 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 151435127}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 4, y: 4, z: 4}
+  m_LocalPosition: {x: 9.65, y: 7.39, z: 0}
+  m_LocalScale: {x: 10, y: 10, z: 10}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 968983097}
   m_RootOrder: 0
@@ -331,7 +334,7 @@ MonoBehaviour:
   heightTextures: []
   plainTextures:
   - name: HalfSphereSDF3D
-    tex: {fileID: 11700000, guid: df46154437e69974098aa1fae33b32b2, type: 2}
+    tex: {fileID: 11700000, guid: f23186cc26abf3e458b9e28570c6dbbf, type: 2}
     channel: 3
   - name: HalfSphereNorm3D
     tex: {fileID: 11700000, guid: 58eafc6f3d827d24c9ed90a9232f609b, type: 2}
@@ -368,7 +371,7 @@ MonoBehaviour:
   noiseLength: 0.2
   noiseFrequency: 5
   mergeType: 0
-  objInx: 1
+  objInx: 0
   needExtraCondition: 0
   extraCondition: 
 --- !u!23 &151435131
@@ -382,6 +385,7 @@ MeshRenderer:
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
@@ -463,6 +467,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 2.07, y: 0, z: 0}
   m_LocalScale: {x: 4, y: 4, z: 4}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 968983097}
   m_RootOrder: 1
@@ -491,6 +496,7 @@ MeshRenderer:
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
@@ -650,8 +656,9 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 705507993}
   m_LocalRotation: {x: 0.40821788, y: -0.23456968, z: 0.10938163, w: 0.8754261}
-  m_LocalPosition: {x: 0, y: 3, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 1
@@ -713,6 +720,7 @@ MeshRenderer:
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
@@ -761,6 +769,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 3, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 5
@@ -804,14 +813,13 @@ MonoBehaviour:
   bakedSpecialObjects: []
   bakedMaterials: []
   bakedRenderModes:
-  - int renderMode[2];
+  - int renderMode[1];
   bakedRenders: []
   bakedShadows: []
   bakedBeforeSDF: []
   bakedCheckInnerBound: []
   bakedObjEnvTex: []
   tags:
-  - {fileID: 678384087}
   - {fileID: 151435130}
 --- !u!4 &902179151
 Transform:
@@ -823,6 +831,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 2
@@ -856,7 +865,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   outTextures:
   - name: HalfSphereSDF3D
-    tex: {fileID: 11700000, guid: df46154437e69974098aa1fae33b32b2, type: 2}
+    tex: {fileID: 11700000, guid: f23186cc26abf3e458b9e28570c6dbbf, type: 2}
     channel: 3
   - name: HalfSphereNorm3D
     tex: {fileID: 11700000, guid: 58eafc6f3d827d24c9ed90a9232f609b, type: 2}
@@ -926,7 +935,7 @@ Camera:
   field of view: 60
   orthographic: 0
   orthographic size: 5
-  m_Depth: -1
+  m_Depth: 0.01
   m_CullingMask:
     serializedVersion: 2
     m_Bits: 4294967295
@@ -948,9 +957,10 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 963194225}
-  m_LocalRotation: {x: -0.21159427, y: -0.030196639, z: 0.006530768, w: -0.97686917}
-  m_LocalPosition: {x: 2.589421, y: 2.8606007, z: -7.2812777}
+  m_LocalRotation: {x: 0.105957255, y: 0.5514082, z: -0.07084881, w: 0.8244407}
+  m_LocalPosition: {x: 7.3603745, y: 8.866609, z: -1.7329197}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
@@ -1067,6 +1077,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 151435128}
   - {fileID: 678384083}
@@ -1099,6 +1110,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 93880498}
   - {fileID: 82078352}
@@ -1134,6 +1146,7 @@ Transform:
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: -9.350815, y: -8.573769, z: 6.321093}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1196838529}
   m_RootOrder: 2

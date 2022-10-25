@@ -670,7 +670,15 @@ public class SDFBakerMgr : MonoBehaviour
         if (textag.plainTextures.Count >= 2)
         {
             string normTexName = textag.plainTextures[1].name;
-            bakedObjNormals.Add("return SDFTexNorm3D(p, " + centerStr + ", " + boundStr + ", " + normTexName + ");");
+            bakedObjNormals.Add("return GetObjSDFNormal(inx, ray.pos, traceInfo, extra, 100);");
+            {
+                //bakedObjNormals.Add("return SDFTexNorm3D(p, " + centerStr + ", " + boundStr + ", " + normTexName + ");");
+            }
+            {
+                //bakedObjNormals.Add("float3 n1 = SDFTexNorm3D(p, " + centerStr + ", " + boundStr + ", " + normTexName + ");");
+                //bakedObjNormals.Add("float3 n2 = GetObjSDFNormal(inx, ray.pos, traceInfo, extra, 10);");
+                //bakedObjNormals.Add("return lerp(n1, n2, 0.5);");
+            }
         }
         //___Normal
     }
