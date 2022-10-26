@@ -9,14 +9,12 @@
 struct ExtraInfo
 {
 	float3 seed;
-	float screenDepth;
 float cloudLength;
 };
 
 void Init(out ExtraInfo extra)
 {
 	extra.seed = 0;
-	extra.screenDepth = 0;
 extra.cloudLength = 0;
 }
 
@@ -42,10 +40,13 @@ float pixW;
 float pixH;
 float3 screenU;
 float3 screenV;
+float3 camForward;
+float camFar;
+float camNear;
 
 RWTexture2D<float4> Result;
 RWTexture2D<float4> IndirectResult;
-RWTexture2D<float> DepthRT;
+RWTexture2D<float> NdcDepthRT;
 
 //#########################################################################################################
 #include "SDFGameScene_gytest.hlsl"
@@ -134,7 +135,19 @@ void Render(uint3 id : SV_DispatchThreadID)
 				ray.dir = normalize(ray.pos - eyePos);
 			}
 			SSAA_colors[i - 1 + (j - 1)* SSAA_edge] = GetSDFGameColor(ray, minHit, mat, extra);
-			SSAA_Depth[i - 1 + (j - 1)* SSAA_edge] = extra.screenDepth;
+
+			float tdepth = -MAXFLOAT / SSAA_num;
+			if(minHit.bHit)
+			{
+				//https://docs.unity3d.com/560/Documentation/Manual/SL-PlatformDifferences.html
+				tdepth = dot(camForward,(minHit.P - ray.pos) );
+				float w = tdepth;
+				tdepth = (tdepth - camNear)/(camFar - camNear);
+				tdepth = saturate(tdepth);
+				float z = lerp(camNear, 0 , tdepth);
+				tdepth = z/ w;
+			}
+			SSAA_Depth[i - 1 + (j - 1)* SSAA_edge] = tdepth;
 			//if(useIndirectRT)
 			//{
 			//	SSAA_indirColors[i - 1 + (j - 1)* SSAA_edge] = GetSDFGameIndirColor(ray,seed,minHit,mat);
@@ -166,6 +179,6 @@ void Render(uint3 id : SV_DispatchThreadID)
 	{
 		re_depth += SSAA_Depth[i];
 	}
-	re /= (float)SSAA_num;
-	DepthRT[id.xy] = re_depth;
+	re_depth /= (float)SSAA_num;
+	NdcDepthRT[id.xy] = re_depth;
 }

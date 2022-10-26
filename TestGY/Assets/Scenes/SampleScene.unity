@@ -436,7 +436,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e6b24a05282d6a44d87e90ec8db78fac, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  meshHideInGame: 0
+  meshHideInGame: 1
 --- !u!1 &373849381
 GameObject:
   m_ObjectHideFlags: 0
@@ -1054,8 +1054,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 963194225}
-  m_LocalRotation: {x: 0.17838985, y: 0.7377813, z: -0.2139647, w: 0.61487806}
-  m_LocalPosition: {x: -5.297785, y: 3.6244087, z: 0.5803838}
+  m_LocalRotation: {x: 0.00931415, y: 0.9845861, z: -0.05499793, w: 0.16576722}
+  m_LocalPosition: {x: -2.208722, y: 0.34492397, z: 5.259636}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1103,16 +1103,15 @@ MonoBehaviour:
   renderSize: {x: 1920, y: 1080}
   useIndirectRT: 0
   indirectMultiplier: 1
-  trt: {fileID: 0}
   rt_gyFinal: {fileID: 0}
   useFSR: 0
   FSR_Scale: 2
   SceneName: gytest
   autoCS: {fileID: 963194229}
   keyboard: {fileID: 0}
-  rt_camDepth: {fileID: 0}
   rt1: {fileID: 0}
   rt2: {fileID: 0}
+  rt_gyDepth: {fileID: 0}
   depthCopyMat: {fileID: 2100000, guid: bdf9f2ca0d28d5b489c6efffdab9e308, type: 2}
 --- !u!114 &963194231
 MonoBehaviour:

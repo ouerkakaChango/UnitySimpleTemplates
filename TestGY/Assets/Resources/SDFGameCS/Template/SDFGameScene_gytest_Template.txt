@@ -167,7 +167,8 @@ void TraceScene(Ray ray, out HitInfo info, inout ExtraInfo extra)
 	Init(info);
 
 	TraceInfo traceInfo;
-	Init(traceInfo,MaxSDF);
+	Init(traceInfo);
+	float3 oriPos = ray.pos;
 
 	float objSDF[OBJNUM];
 	bool innerBoundFlag[OBJNUM];
@@ -238,93 +239,12 @@ void TraceScene(Ray ray, out HitInfo info, inout ExtraInfo extra)
 			info.obj = objInx;
 			info.N = GetObjNormal(objInx, ray, traceInfo, extra);
 			info.P = ray.pos;
-			extra.screenDepth = traceInfo.traceSum;
 			break;
 		}
 		ray.pos += sdf * ray.dir;
 		Update(traceInfo,sdf);
 	}
 }
-
-void TraceScene2(Ray ray, out HitInfo info)
-{
-	float traceThre = TraceThre;
-
-	Init(info);
-
-	TraceInfo traceInfo;
-	Init(traceInfo,MaxSDF);
-
-	float objSDF[OBJNUM];
-	bool innerBoundFlag[OBJNUM];
-	float innerBoundStepScale[OBJNUM];
-	int objInx = -1;
-	float sdf = MaxSDF;
-	bool bInnerBound = false;
-
-	while (traceInfo.traceCount <= MaxTraceTime)
-	{
-		objInx = -1;
-		sdf = MaxSDF;
-		bInnerBound = false;
-		for (int inx = 0; inx < OBJNUM; inx++)
-		{
-			innerBoundFlag[inx] = false;
-			innerBoundStepScale[inx] = 1;
-		}
-
-
-		//if(bInnerBound)
-		//{
-		//	for (int inx = 0; inx < OBJNUM; inx++)
-		//	{
-		//		if(innerBoundFlag[inx])
-		//		{
-		//			objSDF[inx] = GetObjSDF(inx, ray.pos, traceInfo) * innerBoundStepScale[inx];
-		//			if (objSDF[inx] < sdf)
-		//			{
-		//				sdf = objSDF[inx];
-		//				objInx = inx;
-		//			}
-		//		}
-		//	}
-		//}
-		//else
-		//{
-		//	for (int inx = 0; inx < OBJNUM; inx++)
-		//	{
-		//		objSDF[inx] = GetObjSDF(inx, ray.pos, traceInfo);
-		//		if (objSDF[inx] < sdf)
-		//		{
-		//			sdf = objSDF[inx];
-		//			objInx = inx;
-		//		}
-		//	}
-		//}
-
-		//if(objInx == -1)
-		//{
-		//	break;
-		//}
-		//
-		//if (sdf > MaxTraceDis)
-		//{
-		//	break;
-		//}
-		//
-		//if (abs(sdf) <= traceThre)
-		//{
-		//	info.bHit = true;
-		//	info.obj = objInx;
-		//	info.N = GetObjNormal(objInx, ray, traceInfo);
-		//	info.P = ray.pos;
-		//	break;
-		//}
-		//ray.pos -= sdf * ray.dir;
-		//Update(traceInfo,sdf);
-	}
-}
-
 ###BLOCK ExtraFuncDependOnTraceScene
 		...
 ###BLOCK

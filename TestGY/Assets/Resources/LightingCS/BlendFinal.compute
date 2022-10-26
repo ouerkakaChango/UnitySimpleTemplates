@@ -3,6 +3,7 @@
 #pragma kernel CopyToNewFront
 #pragma kernel BlendBAlpha
 #pragma kernel SetRed
+#pragma kernel BlendABWithDepth
 
 #include "../../HLSL/CommonDef.hlsl"
 // Create a RenderTexture with enableRandomWrite flag and set it
@@ -49,14 +50,35 @@ void CopyToNewFront(uint3 id : SV_DispatchThreadID)
 	Result[id.xy] = NewFrontIndirect[id.xy];
 }
 
-RWTexture2D<float3> TexA;
-RWTexture2D<float4> TexB;
+Texture2D<float3> TexA;
+Texture2D<float4> TexB;
 [numthreads(8, 8, 1)]
 void BlendBAlpha(uint3 id : SV_DispatchThreadID)
 {
 	float a2 = TexB[id.xy].a;
 	float a1 = 1 - a2;
 	Result[id.xy] = float4(a1*TexA[id.xy].rgb + a2 * TexB[id.xy].rgb, 1);
+}
+
+float4 _ZBufferParams;
+inline float LinearEyeDepth(float z)
+{
+	return 1.0 / (_ZBufferParams.z * z + _ZBufferParams.w);
+}
+
+Texture2D<float4> TexSceneA;
+Texture2D<float> TexSceneAUnlinearDepth;
+Texture2D<float> TexBNdcDepth;
+[numthreads(8, 8, 1)]
+void BlendABWithDepth(uint3 id : SV_DispatchThreadID)
+{
+	float3 col1 = TexSceneA[id.xy].rgb;
+	float3 col2 = TexB[id.xy].rgb;
+	float d1 = TexSceneAUnlinearDepth[id.xy].r;
+
+	float d2 = TexBNdcDepth[id.xy].r;
+	float3 re = d1 > d2 ? col1 : col2;
+	Result[id.xy] = float4(re, 1);
 }
 
 [numthreads(8, 8, 1)]

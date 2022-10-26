@@ -50,6 +50,9 @@ public class SDFGameCameraParam : SDFCameraParam
     public Vector3 screenLeftDownPix;
     public Vector3 screenU;
     public Vector3 screenV;
+    public Vector3 camForward;
+    public float camFar;
+    public float camNear;
     public SimpleHandler paramFinalFunc = null;
 
     public SDFGameCameraParam() {
@@ -70,6 +73,9 @@ public class SDFGameCameraParam : SDFCameraParam
         to.screenLeftDownPix = from.screenLeftDownPix;
         to.screenU = from.screenU;
         to.screenV = from.screenV;
+        to.camForward = from.camForward;
+        to.camFar = from.camFar;
+        to.camNear = from.camNear;
         to.paramFinalFunc = from.paramFinalFunc;
     }
 
@@ -77,6 +83,7 @@ public class SDFGameCameraParam : SDFCameraParam
     {
         var obj = cam.gameObject;
 
+        camNear = cam.nearClipPlane;
         var near = cam.nearClipPlane;
         near *= daoScale;
 
@@ -84,11 +91,11 @@ public class SDFGameCameraParam : SDFCameraParam
         float verticleFOV = cam.fieldOfView / 180.0f*Mathf.PI;
 
         //tan(half) = (0.5*H)/(near)
-        float screenH = Mathf.Tan(verticleFOV * 0.5f) * near * 2;
-        float screenW = screenH * cam.aspect;
+        float screenHeight = Mathf.Tan(verticleFOV * 0.5f) * near * 2;
+        float screenWidth = screenHeight * cam.aspect;
 
-        pixW = screenW / w;
-        pixH = screenH / h;
+        pixW = screenWidth / w;
+        pixH = screenHeight / h;
 
         if (camType==2)
         {
@@ -96,7 +103,8 @@ public class SDFGameCameraParam : SDFCameraParam
         }
 
         eyePos = obj.transform.position;
-        var camForward = obj.transform.forward;
+        camForward = obj.transform.forward;
+        camFar = cam.farClipPlane;
         var screenPos = eyePos + near * camForward;
         screenU = obj.transform.right;
         screenV = obj.transform.up;
@@ -114,6 +122,9 @@ public class SDFGameCameraParam : SDFCameraParam
         cs.SetVector("eyePos", eyePos);
         cs.SetVector("screenU", screenU);
         cs.SetVector("screenV", screenV);
+        cs.SetVector("camForward", camForward);
+        cs.SetFloat("camFar", camFar);
+        cs.SetFloat("camNear", camNear);
     }
 }
 
@@ -139,7 +150,6 @@ public class SDFGameSceneTrace : MonoBehaviour
     //___
 
      RenderTexture rt;
-    public RenderTexture trt = null;
     public RenderTexture rt_gyFinal = null;
     RenderTexture directRT = null;
      RenderTexture newFrontIndirectRT = null, frontIndirectRT =null,indirectRT = null;
@@ -167,7 +177,7 @@ public class SDFGameSceneTrace : MonoBehaviour
     //___
 
     //---DepthRT
-    public RenderTexture rt_camDepth, rt1,rt2;
+    public RenderTexture rt1,rt2;
     public RenderTexture rt_gyDepth;
     //___
 
@@ -201,7 +211,7 @@ public class SDFGameSceneTrace : MonoBehaviour
             rt2 = new RenderTexture(renderSize.x, renderSize.y, 24, RenderTextureFormat.Depth);
             cam.SetTargetBuffers(rt1.colorBuffer, rt2.depthBuffer);
 
-            CreateRT(ref rt_camDepth, 1, renderSize.x, renderSize.y, 0, RenderTextureFormat.RFloat);
+            //CreateRT(ref rt_camDepth, 1, renderSize.x, renderSize.y, 0, RenderTextureFormat.RFloat);
 
             maincamParam = new SDFGameCameraParam();
             maincamParam.w = renderSize.x;
@@ -274,14 +284,28 @@ public class SDFGameSceneTrace : MonoBehaviour
         }
         else
         {
-            Graphics.Blit((RenderTexture)rt1, trt);
-            CopyDepth(ref rt2, ref rt_camDepth);
+            //Graphics.Blit((RenderTexture)rt1, trt);
+            //CopyDepth(ref rt2, ref rt_camDepth);
             //###########
             //### compute
-            int kInx = cs_blendGYResult.FindKernel("BlendBAlpha");
+            //int kInx = cs_blendGYResult.FindKernel("BlendBAlpha");
+            //cs_blendGYResult.SetTexture(kInx, "Result", rt_gyFinal);
+            //cs_blendGYResult.SetTexture(kInx, "TexA", trt);
+            //cs_blendGYResult.SetTexture(kInx, "TexB", rt);
+            //cs_blendGYResult.Dispatch(kInx, renderSize.x / CoreX, renderSize.y / CoreY, 1);
+            //### compute
+            //###########
+
+            var cam = GetComponent<Camera>();
+            //###########
+            //### compute
+            int kInx = cs_blendGYResult.FindKernel("BlendABWithDepth");
+            cs_blendGYResult.SetVector("_ZBufferParams", GetZBufferParams(cam.nearClipPlane, cam.farClipPlane));
             cs_blendGYResult.SetTexture(kInx, "Result", rt_gyFinal);
-            cs_blendGYResult.SetTexture(kInx, "TexA", trt);
+            cs_blendGYResult.SetTexture(kInx, "TexSceneA", rt1);
             cs_blendGYResult.SetTexture(kInx, "TexB", rt);
+            cs_blendGYResult.SetTexture(kInx, "TexSceneAUnlinearDepth", rt2);
+            cs_blendGYResult.SetTexture(kInx, "TexBNdcDepth", rt_gyDepth);
             cs_blendGYResult.Dispatch(kInx, renderSize.x / CoreX, renderSize.y / CoreY, 1);
             //### compute
             //###########
@@ -422,7 +446,7 @@ public class SDFGameSceneTrace : MonoBehaviour
             computeShader.SetTexture(kInx, "Result", rTex);
             //!!! 反正不用到，但是参数要传进去，省得变shader代码
             computeShader.SetTexture(kInx, "IndirectResult", uselessRT);
-            computeShader.SetTexture(kInx, "DepthRT", rt_gyDepth);
+            computeShader.SetTexture(kInx, "NdcDepthRT", rt_gyDepth);
         }
 
         camParam.InsertParamToComputeShader(ref computeShader);
@@ -525,11 +549,11 @@ public class SDFGameSceneTrace : MonoBehaviour
     void MainRenderFunc()
     {
         var cam = gameObject.GetComponent<Camera>();
-        if (trt == null)
+        if (cs_blendGYResult == null)
         {
-            trt = new RenderTexture(maincamParam.w, maincamParam.h, 0, RenderTextureFormat.ARGBFloat);
-            trt.enableRandomWrite = true;
-            trt.Create();
+            //trt = new RenderTexture(maincamParam.w, maincamParam.h, 0, RenderTextureFormat.ARGBFloat);
+            //trt.enableRandomWrite = true;
+            //trt.Create();
 
             CreateRT(ref rt_gyFinal,1, maincamParam.w, maincamParam.h);
             CreateRT(ref rt_gyDepth, 1, maincamParam.w, maincamParam.h,0,RenderTextureFormat.RFloat);
@@ -563,5 +587,16 @@ public class SDFGameSceneTrace : MonoBehaviour
     void CopyDepth(ref RenderTexture src, ref RenderTexture tar)
     {
         Graphics.Blit(src, tar);
+    }
+
+    //代码:https://docs.unity3d.com/Manual/SL-UnityShaderVariables.html
+    //推导:https://www.wgqing.com/lineareyedepth%E6%8E%A8%E5%AF%BC/
+    Vector4 GetZBufferParams(float n, float f)
+    {
+        float x = (1 - f) / n;
+        float y = f / n;
+        float z = x / f;
+        float w = y / f;
+        return new Vector4(x, y, z, w);
     }
 }
