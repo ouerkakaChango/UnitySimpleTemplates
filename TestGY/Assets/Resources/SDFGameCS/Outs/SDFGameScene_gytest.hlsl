@@ -25,7 +25,7 @@ float daoScale;
 
 //@@@SDFBakerMgr TexSys
 Texture3D<float> HalfSphereSDF3D;
-Texture3D<float3> HalfSphereNorm3D;
+Texture3D<float3> Norm_Bunny;
 //@@@
 
 //@@@SDFBakerMgr DyValSys

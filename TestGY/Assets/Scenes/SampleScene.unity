@@ -295,8 +295,9 @@ GameObject:
   - component: {fileID: 151435132}
   - component: {fileID: 151435131}
   - component: {fileID: 151435133}
+  - component: {fileID: 151435134}
   m_Layer: 0
-  m_Name: Cloud1
+  m_Name: BunnyCloud1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -336,8 +337,8 @@ MonoBehaviour:
   - name: HalfSphereSDF3D
     tex: {fileID: 11700000, guid: f23186cc26abf3e458b9e28570c6dbbf, type: 2}
     channel: 3
-  - name: HalfSphereNorm3D
-    tex: {fileID: 11700000, guid: 58eafc6f3d827d24c9ed90a9232f609b, type: 2}
+  - name: Norm_Bunny
+    tex: {fileID: 8400000, guid: 47ffc2fbc83a68749a8e57645bed7733, type: 2}
     channel: 1
   envTextures: []
   texInx: 0
@@ -437,6 +438,24 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   meshHideInGame: 1
+--- !u!114 &151435134
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 151435127}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b8ba272934e818648be3683b946a67a3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mesh: {fileID: 7605792779696668132, guid: dd43c90e98ba4ce48a7e744ea97e8c4b, type: 3}
+  normalEpsilon: 0.5
+  normalEpsilonScale: 1
+  meshSDF3D: {fileID: 11700000, guid: f23186cc26abf3e458b9e28570c6dbbf, type: 2}
+  volu: {fileID: 8400000, guid: 47ffc2fbc83a68749a8e57645bed7733, type: 2}
+  meshNormal3D: {fileID: 0}
 --- !u!1 &373849381
 GameObject:
   m_ObjectHideFlags: 0
@@ -964,14 +983,13 @@ MonoBehaviour:
   - name: HalfSphereSDF3D
     tex: {fileID: 11700000, guid: f23186cc26abf3e458b9e28570c6dbbf, type: 2}
     channel: 3
-  - name: HalfSphereNorm3D
-    tex: {fileID: 11700000, guid: 58eafc6f3d827d24c9ed90a9232f609b, type: 2}
+  - name: Norm_Bunny
+    tex: {fileID: 0}
     channel: 1
   tags:
   - {fileID: 151435129}
   bakedDeclares:
   - Texture3D<float> HalfSphereSDF3D;
-  - Texture3D<float3> HalfSphereNorm3D;
   bakedEnvTexSettings: []
 --- !u!1 &963194225
 GameObject:
@@ -1054,8 +1072,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 963194225}
-  m_LocalRotation: {x: 0.00931415, y: 0.9845861, z: -0.05499793, w: 0.16576722}
-  m_LocalPosition: {x: -2.208722, y: 0.34492397, z: 5.259636}
+  m_LocalRotation: {x: 0.04320595, y: 0.86560225, z: -0.07574256, w: 0.4930813}
+  m_LocalPosition: {x: -6.7928524, y: 0.7381244, z: 0.47341347}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

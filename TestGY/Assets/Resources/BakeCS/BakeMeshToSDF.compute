@@ -1,0 +1,23 @@
+#pragma kernel BakeMeshNormal
+
+#include "../../HLSL/CommonDef.hlsl"
+
+//return normalize(float3(
+//	GetObjSDF(inx, float3(p.x + NormalEpsilon * eplisonScale, p.y, p.z), traceInfo, extra) - GetObjSDF(inx, float3(p.x - NormalEpsilon * eplisonScale, p.y, p.z), traceInfo, extra),
+//	GetObjSDF(inx, float3(p.x, p.y + NormalEpsilon * eplisonScale, p.z), traceInfo, extra) - GetObjSDF(inx, float3(p.x, p.y - NormalEpsilon * eplisonScale, p.z), traceInfo, extra),
+//	GetObjSDF(inx, float3(p.x, p.y, p.z + NormalEpsilon * eplisonScale), traceInfo, extra) - GetObjSDF(inx, float3(p.x, p.y, p.z - NormalEpsilon * eplisonScale), traceInfo, extra)
+//	));
+
+RWTexture3D<float4> Result_meshNormal;
+Texture3D<float> MeshSDF;
+float delta;
+[numthreads(8, 8, 8)]
+void BakeMeshNormal(uint3 id : SV_DispatchThreadID)
+{
+	float3 re = 0;
+	re.x = MeshSDF[id + float3(delta, 0, 0)] - MeshSDF[id - float3(delta, 0, 0)];
+	re.y = MeshSDF[id + float3(0, delta, 0)] - MeshSDF[id - float3(0, delta, 0)];
+	re.z = MeshSDF[id + float3(0, 0, delta)] - MeshSDF[id - float3(0, 0, delta)];
+	re = normalize(re);
+	Result_meshNormal[id.xyz] = float4(re, 1);
+}

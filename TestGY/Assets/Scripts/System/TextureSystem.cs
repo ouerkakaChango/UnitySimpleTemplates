@@ -195,9 +195,14 @@ public class TextureSystem : MonoBehaviour
         {
             return "Texture2DArray";
         }
-        else if((namedTexture.tex).GetType() == typeof(Texture3D))
+        else if(namedTexture.tex.GetType() == typeof(Texture3D))
         {
             //Debug.Log("3D Tex!");
+            return GetTexture3DPrefix(namedTexture);
+        }
+        else if(namedTexture.tex.GetType() == typeof(RenderTexture) && namedTexture.tex.dimension == UnityEngine.Rendering.TextureDimension.Tex3D)
+        {
+            //Debug.Log("RT 3D Tex!");
             return GetTexture3DPrefix(namedTexture);
         }
 
