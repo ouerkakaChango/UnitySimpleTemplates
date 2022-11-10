@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Reflection;
+
 using UnityEngine;
 using UnityEngine.Rendering;
 using Object = UnityEngine.Object;
@@ -9,7 +11,7 @@ namespace CenturyGame.SDFTool
 {
     class SDFBakeTool : EditorWindow
     {
-        [MenuItem("XC/Visual Effects/Utilities/SDF Bake Tool", false, 3013)]
+        [MenuItem("XC/CG SDF Bake Tool", false, 3013)]
         static void OpenWindow()
         {
             GetWindow<SDFBakeTool>();
@@ -22,7 +24,7 @@ namespace CenturyGame.SDFTool
 
         private RenderTexture m_BakedSDF;
         private SdfBakerPreview m_MeshPreview;
-        private Texture3DPreview m_TexturePreview;
+        //private Texture3DPreview m_TexturePreview;
         private bool m_RefreshMeshPreview = false;
         private bool m_ShowAdvanced;
         private MeshToSDFBaker m_Baker;
@@ -277,9 +279,17 @@ namespace CenturyGame.SDFTool
                 m_RefreshMeshPreview = false;
             }
 
-            if (mesh == null || (estimatedGridSize > MeshToSDFBaker.kMaxGridSize) || InternalMeshUtil.GetPrimitiveCount(mesh) == 0)
+            //通过反射调用接口
+            var assembly = typeof(EditorWindow).Assembly;
+            var t1 = assembly.GetType("UnityEditor.InternalMeshUtil");
+            MethodInfo info = t1.GetMethod("GetPrimitiveCount", BindingFlags.Static | BindingFlags.Public );
+
+            int tt = 0;
+            tt = (int)info.Invoke(null, new System.Object[] { mesh });
+
+            if (mesh == null || (estimatedGridSize > MeshToSDFBaker.kMaxGridSize) || tt == 0)
             {
-                GUI.enabled = false;
+                GUI.enabled = false; 
             }
 
             if (GUILayout.Button("Bake mesh") || m_LiveUpdate && needsUpdate)
@@ -294,7 +304,6 @@ namespace CenturyGame.SDFTool
                     m_Baker.Reinit(boxSizeReference, boxCenter, maxResolution, mesh, signPassesCount,
                         inOutThreshold, surfaceOffset);
                 }
-
                 m_Baker.BakeSDF();
                 m_BakedSDF = m_Baker.SdfTexture;
             }
@@ -306,7 +315,7 @@ namespace CenturyGame.SDFTool
             if ((m_BakedSDF == null) || (m_Baker == null))
             {
                 canSave = false;
-                GUI.enabled = false;
+                GUI.enabled = false; // save sdf
             }
 
             if (GUILayout.Button(canSave ? Contents.saveSDF : Contents.saveSDFBlocked))
@@ -335,14 +344,14 @@ namespace CenturyGame.SDFTool
         {
             if (m_BakedSDF)
             {
-                if (m_TexturePreview == null) m_TexturePreview = CreateInstance<Texture3DPreview>();
-                m_TexturePreview.Texture = m_BakedSDF;
-                GUILayout.BeginHorizontal();
-                m_TexturePreview.OnPreviewSettings(new Object[] { m_BakedSDF });
-                GUILayout.EndHorizontal();
-                Rect rect = GUILayoutUtility.GetRect(100, 2000, 100, 2000, GUIStyle.none);
-                m_TexturePreview.OnPreviewGUI(rect, GUIStyle.none);
-                EditorGUI.DropShadowLabel(rect, m_TexturePreview.GetInfoString());
+                //if (m_TexturePreview == null) m_TexturePreview = CreateInstance<Texture3DPreview>();
+                //m_TexturePreview.Texture = m_BakedSDF;
+                //GUILayout.BeginHorizontal();
+                //m_TexturePreview.OnPreviewSettings(new Object[] { m_BakedSDF });
+                //GUILayout.EndHorizontal();
+                //Rect rect = GUILayoutUtility.GetRect(100, 2000, 100, 2000, GUIStyle.none);
+                //m_TexturePreview.OnPreviewGUI(rect, GUIStyle.none);
+                //EditorGUI.DropShadowLabel(rect, m_TexturePreview.GetInfoString());
             }
         }
 
@@ -393,10 +402,10 @@ namespace CenturyGame.SDFTool
                 m_Settings = CreateInstance<SdfBakerSettings>();
                 m_Settings.name = "None";
             }
-            if (m_TexturePreview == null) m_TexturePreview = CreateInstance<Texture3DPreview>();
-            m_TexturePreview.OnEnable();
-            if (m_BakedSDF != null)
-                m_TexturePreview.Texture = m_BakedSDF;
+           // if (m_TexturePreview == null) m_TexturePreview = CreateInstance<Texture3DPreview>();
+           // m_TexturePreview.OnEnable();
+           // if (m_BakedSDF != null)
+           //     m_TexturePreview.Texture = m_BakedSDF;
             if (m_MeshPreview == null) m_MeshPreview = new SdfBakerPreview(mesh); // Not sure if necessary
             Undo.undoRedoPerformed += OnUndoRedoPerformed;
             PrefabUtility.prefabInstanceUpdated += OnPrefabInstanceUpdated;
@@ -412,11 +421,11 @@ namespace CenturyGame.SDFTool
                 m_BakedSDF.Release();
             }
 
-            if (m_TexturePreview)
-            {
-                m_TexturePreview.OnDisable();
-                m_TexturePreview = null;
-            }
+            //if (m_TexturePreview)
+            //{
+            //    m_TexturePreview.OnDisable();
+            //    m_TexturePreview = null;
+            //}
             Undo.undoRedoPerformed -= OnUndoRedoPerformed;
             PrefabUtility.prefabInstanceUpdated -= OnPrefabInstanceUpdated;
             Selection.selectionChanged -= OnSelectionChanged;
@@ -581,11 +590,11 @@ namespace CenturyGame.SDFTool
                 m_MeshPreview = null;
             }
 
-            if (m_TexturePreview != null)
-            {
-                m_TexturePreview.OnDisable();
-                m_TexturePreview = null;
-            }
+            //if (m_TexturePreview != null)
+            //{
+            //    m_TexturePreview.OnDisable();
+            //    m_TexturePreview = null;
+            //}
 
             m_RefreshMeshPreview = false;
             if (m_Baker != null)
@@ -628,11 +637,11 @@ namespace CenturyGame.SDFTool
         {
             m_Settings = newSettings;
             m_ActualBoxSize = SnapBoxToVoxels();
-            if (m_TexturePreview != null)
-            {
-                m_TexturePreview.OnDisable();
-            }
-            m_TexturePreview = CreateInstance<Texture3DPreview>();
+            //if (m_TexturePreview != null)
+            //{
+            //    m_TexturePreview.OnDisable();
+            //}
+            //m_TexturePreview = CreateInstance<Texture3DPreview>();
             if (m_MeshPreview != null)
             {
                 m_MeshPreview.Dispose();
@@ -648,7 +657,7 @@ namespace CenturyGame.SDFTool
 
         static class Contents
         {
-            internal static GUIContent title = new GUIContent("SDF Bake Tool");
+            internal static GUIContent title = new GUIContent("CG SDF Bake Tool");
             internal static GUIContent maxResolution = new GUIContent("Max resolution", "Sets the number of voxels of the largest dimension.");
             internal static GUIContent mesh = new GUIContent("Mesh");
             internal static GUIContent boxSizeReference = new GUIContent("Desired Box Size", "Size of the desired Bounding Box. The Actual Bounding Box will be slightly modified to make sure that each voxel is a cube. Displayed in white in the mesh preview.");

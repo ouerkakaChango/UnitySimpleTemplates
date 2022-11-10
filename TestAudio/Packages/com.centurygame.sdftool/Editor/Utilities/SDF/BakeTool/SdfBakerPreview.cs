@@ -1,4 +1,6 @@
 using System;
+using System.Reflection;
+
 using UnityEngine;
 using Transform = UnityEngine.Transform;
 using UObject = UnityEngine.Object;
@@ -394,7 +396,15 @@ namespace CenturyGame.SDFTool
             if (mesh == null)
                 return "";
 
-            string info = $"{mesh.vertexCount} Vertices, {InternalMeshUtil.GetPrimitiveCount(mesh)} Triangles";
+            // 通过反射调用接口
+            var assembly = typeof(EditorWindow).Assembly;
+            var t1 = assembly.GetType("UnityEditor.InternalMeshUtil");
+            MethodInfo minfo = t1.GetMethod("GetPrimitiveCount", BindingFlags.Static | BindingFlags.Public);
+
+            int tt = 0;
+            tt = (int)minfo.Invoke(null, new System.Object[] { mesh });
+
+            string info = $"{mesh.vertexCount} Vertices, {tt} Triangles";
 
             int submeshes = mesh.subMeshCount;
             if (submeshes > 1)

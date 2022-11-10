@@ -1,5 +1,5 @@
 {
-    "name": "Unity.VisualEffectGraph.Editor",
+    "name": "CenturyGame.SDFTool.Editor",
     "rootNamespace": "",
     "references": [
         "GUID:62b431de6d236f44ca276d3919555474",
