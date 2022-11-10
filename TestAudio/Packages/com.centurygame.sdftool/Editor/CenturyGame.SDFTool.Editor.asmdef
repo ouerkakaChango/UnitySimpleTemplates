@@ -1,0 +1,19 @@
+{
+    "name": "Unity.VisualEffectGraph.Editor",
+    "rootNamespace": "",
+    "references": [
+        "GUID:62b431de6d236f44ca276d3919555474",
+        "GUID:d1d03b8bb4d12ee47963b9557d1b974e"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
