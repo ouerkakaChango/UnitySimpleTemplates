@@ -11,7 +11,7 @@ namespace CenturyGame.SDFTool
 {
     class SDFBakeTool : EditorWindow
     {
-        [MenuItem("XC/CG SDF Bake Tool", false, 3013)]
+        [MenuItem("CenturyGame/CG SDF Bake Tool", false, 3013)]
         static void OpenWindow()
         {
             GetWindow<SDFBakeTool>();
